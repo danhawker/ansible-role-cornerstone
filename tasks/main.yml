@@ -7,7 +7,7 @@
 # -----------------------------------------------------------------------------
 #
 - include: common-{{ cornerstone_platform }}.yml
-  tags: [common,"{{ cornerstone_platform }}"]
+  tags: [common, "{{ cornerstone_platform }}"]
 
 
 #
@@ -16,7 +16,7 @@
 # -----------------------------------------------------------------------------
 #
 - include: network-{{ cornerstone_platform }}.yml
-  tags: [network,"{{ cornerstone_platform }}"]
+  tags: [network, "{{ cornerstone_platform }}"]
 
 #
 # -----------------------------------------------------------------------------
@@ -24,7 +24,7 @@
 # -----------------------------------------------------------------------------
 #
 - include: vm-{{ cornerstone_platform }}.yml
-  tags: [vm,"{{ cornerstone_platform }}"]
+  tags: [vm, "{{ cornerstone_platform }}"]
 
 #
 # -----------------------------------------------------------------------------

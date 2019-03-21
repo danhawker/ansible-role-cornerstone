@@ -45,7 +45,7 @@
 
 - name: "[Cornerstone - VM] Display DNS/IP Address"
   debug:
-    msg: "Cornerstone VM {{ cornerstone_public_private_ip}} IP Address: {{ cornerstone_vm_ipaddress }}"
+    msg: "Cornerstone VM {{ cornerstone_public_private_ip }} IP Address: {{ cornerstone_vm_ipaddress }}"
 
 - name: "[Cornerstone - VM] Register IP with Temporary Host Group"
   add_host:

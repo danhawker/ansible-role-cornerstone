@@ -19,7 +19,7 @@
 # Check if we have an existing VM with this name.
 - name: "[Cornerstone - AWS] Check for Existing VM"
   ec2_instance_facts:
-    region: "{{ cornerstone_location}}"
+    region: "{{ cornerstone_location }}"
     profile: "{{ cornerstone_aws_profile}}"
     filters:
       "tag:Name": "{{ cornerstone_vm_name }}"
@@ -39,7 +39,7 @@
 # Pick a Subnet/AZ
 - name: "[Cornerstone - AWS] Retrieve Available Subnets/AZs to place VM"
   ec2_vpc_subnet_facts:
-    region: "{{ cornerstone_location}}"
+    region: "{{ cornerstone_location }}"
     profile: "{{ cornerstone_aws_profile}}"
     filters:
       vpc-id: "{{ vpc.vpc.id }}"
