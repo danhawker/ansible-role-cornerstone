@@ -1,0 +1,68 @@
+---
+# tasks file for cornerstone:network-azure.yml
+
+#
+# -----------------------------------------------------------------------------
+# Network Tasks
+# -----------------------------------------------------------------------------
+#
+#
+
+- name: "[Cornerstone - Azure] Create Public IP Address"
+  azure_rm_publicipaddress:
+    resource_group: "{{ cornerstone_azure_resource_group }}"
+    allocation_method: "{{ cornerstone_publicip_allocation_method }}"
+    domain_name: "{{ cornerstone_publicip_domain_name }}"
+    name: "{{ cornerstone_prefix }}-ip"
+  async: 150
+  poll: 0
+  register: cornerstone_public_ip_output
+
+- name: "[Cornerstone - Azure] Add Subnet"
+  azure_rm_subnet:
+    resource_group: "{{ cornerstone_azure_resource_group }}"
+    name: "{{ cornerstone_subnet_name }}"
+    address_prefix: "{{ cornerstone_azure_subnet_cidr }}"
+    virtual_network: "{{ cornerstone_virtual_network_name }}"
+
+- name: "[Cornerstone - Azure] Create NSG"
+  azure_rm_securitygroup:
+    resource_group: "{{ cornerstone_azure_resource_group }}"
+    name: "{{ cornerstone_prefix }}-nsg"
+    rules:
+      - name: allowSSHin_all
+        protocol: Tcp
+        destination_port_range: 22
+        access: Allow
+        priority: 100
+        direction: Inbound
+  async: 150
+  poll: 0
+
+- name: "[Cornerstone - Azure] Wait for Public IP address to be ready"
+  async_status:
+    jid: "{{ item.ansible_job_id }}"
+    mode: status
+  register: item_result
+  with_items:
+    - "{{ cornerstone_public_ip_output }}"
+  until: item_result.finished
+  retries: 5
+  delay: 30
+
+# Create Virtual NIC (these require Subnets and NSGs)
+- name: "[Cornerstone - Azure] Create Virtual NIC"
+  azure_rm_networkinterface:
+    resource_group: "{{ cornerstone_azure_resource_group }}"
+    name: "{{ cornerstone_prefix }}-nic"
+    virtual_network: "{{ cornerstone_virtual_network_name }}"
+    subnet: "{{ cornerstone_subnet_name }}"
+    security_group: "{{ cornerstone_prefix }}-nsg"
+    ip_configurations:
+    - name: ipconfig0
+      public_ip_address_name: "{{ cornerstone_prefix }}-ip"
+  async: 400
+  poll: 0
+  register: output_nic
+
+#

@@ -1,0 +1,112 @@
+---
+# tasks file for cornerstone:vm-aws.yml
+
+#
+# -----------------------------------------------------------------------------
+# Virtual Machine Tasks
+# -----------------------------------------------------------------------------
+#
+# AWS utilises AZs that are simply mapped to subnets within a VPC.
+# When creating a VM with Ansible, you need to choose a subnet
+# to deploy the VM into. The AWS UX has a "I don't care which AZ I deploy to"
+# option, which the ec2 module does not have.
+# The upshot here, is that if you parameterise the subnet, you cannot ensure
+# idempotency of ec2_instance when you invoke it. To fix that, I first check
+# if an existing VM exists, and if so grabs the subnet in use and uses that.
+# If one doesn't exist, it simply allocates a random subnet/az.
+#
+
+# Check if we have an existing VM with this name.
+- name: "[Cornerstone - AWS] Check for Existing VM"
+  ec2_instance_facts:
+    region: "{{ cornerstone_location}}"
+    profile: "{{ cornerstone_aws_profile}}"
+    filters:
+      "tag:Name": "{{ cornerstone_vm_name }}"
+  register: vm_data
+
+# Set the existing subnet
+- name: "[Cornerstone - AWS] Set Subnet of Existing VM"
+  set_fact:
+    subnet_id: "{{ vm_data.instances[0].subnet_id }}"
+  when: vm_data.instances
+
+- name: "[Cornerstone - AWS] Show Existing Subnet ID"
+  debug:
+    msg: "{{ subnet_id }}"
+  when: subnet_id is defined
+
+# Pick a Subnet/AZ
+- name: "[Cornerstone - AWS] Retrieve Available Subnets/AZs to place VM"
+  ec2_vpc_subnet_facts:
+    region: "{{ cornerstone_location}}"
+    profile: "{{ cornerstone_aws_profile}}"
+    filters:
+      vpc-id: "{{ vpc.vpc.id }}"
+  register: vpc_subnets
+  when: not vm_data.instances
+
+- name: "[Cornerstone - AWS] Show Available Subnet IDs"
+  debug:
+    msg: "{{ vpc_subnets.subnets | map(attribute='id') | list }}"
+  when: not vm_data.instances
+
+# Pick a random subnet/az to place the VM
+- name: "[Cornerstone - AWS] Set Random Subnet ID"
+  set_fact:
+    subnet_id: "{{ vpc_subnets.subnets | map(attribute='id') | list | random }}"
+  when: not vm_data.instances
+
+# Create the VM (baseline no data disks)
+- name: "[Cornerstone - AWS] Create VM"
+  ec2_instance:
+    name: "{{ cornerstone_vm_name }}"
+    region: "{{ cornerstone_location }}"
+    key_name: "{{ cornerstone_aws_ssh_key_name }}"
+    security_group: "{{ cornerstone_prefix }}-sg"
+    # Set the subnet to existing or random subnet_id
+    vpc_subnet_id: "{{ subnet_id }}"
+    instance_type: "{{ cornerstone_vm_flavour }}"
+    image_id: "{{ cornerstone_vm_aws_ami }}"
+    network:
+      assign_public_ip: true
+    profile: "{{ cornerstone_aws_profile }}"
+    tags:
+      Project: "{{ cornerstone_prefix }}"
+  when: not cornerstone_vm_data_disk
+  register: output_vm
+
+# Check VM is Alive
+# The ec2_instance module has a wait functions built in, so no need.
+#- name: "[Cornerstone - AWS] Check VM is Alive"
+#  async_status:
+#    jid: "{{ output_vm.ansible_job_id }}"
+#  when: not cornerstone_vm_data_disk
+#  register: vm_result
+#  until: vm_result.finished
+#  retries: 30
+#  delay: 10
+
+# Create the VM (baseline with data disk)
+- name: "[Cornerstone - AWS] Create VM + Data Disk"
+  ec2_instance:
+    name: "{{ cornerstone_vm_name }}"
+    region: "{{ cornerstone_location }}"
+    key_name: "{{ cornerstone_aws_ssh_key_name }}"
+    security_group: "{{ cornerstone_prefix }}-sg"
+    # Pick a random subnet/az to place the VM
+    vpc_subnet_id: "{{ vpc_subnets.subnets | map(attribute='id') | list | random }}"
+    instance_type: "{{ cornerstone_vm_flavour }}"
+    image_id: "{{ cornerstone_vm_aws_ami }}"
+    network:
+      assign_public_ip: true
+    profile: "{{ cornerstone_aws_profile }}"
+    tags:
+      Project: "{{ cornerstone_prefix }}"
+    volumes:
+      - device_name: /dev/sdb
+        volume_type: "{{ cornerstone_aws_vm_disk_managed }}"
+        volume_size: "{{ cornerstone_vm_data_disk_size }}"
+        delete_on_termination: true
+  when: cornerstone_vm_data_disk
+  register: output_vm

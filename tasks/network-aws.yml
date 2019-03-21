@@ -1,0 +1,97 @@
+---
+# tasks file for cornerstone:network-aws.yml
+
+#
+# -----------------------------------------------------------------------------
+# Network Tasks
+# -----------------------------------------------------------------------------
+#
+
+# Retrieve AZ Info
+- name: "[Cornerstone - AWS] Retrieve AZ Information"
+  aws_az_facts:
+    region: "{{ cornerstone_location }}"
+    profile: "{{ cornerstone_aws_profile }}"
+  register: azs
+
+# Assign IGW to VPC
+- name: "[Cornerstone - AWS] Assign IGW to VPC"
+  ec2_vpc_igw:
+    state: present
+    region: "{{ cornerstone_location }}"
+    vpc_id: "{{ vpc.vpc.id }}"
+    profile: "{{ cornerstone_aws_profile }}"
+    tags:
+      Project: "{{ cornerstone_prefix }}"
+  register: igw
+
+- name: "[Cornerstone - AWS] Set AZ List"
+  set_fact:
+    az_list: "{{ azs.availability_zones | map(attribute='zone_name') | list }}"
+
+# FIXME: dict2items creates key:value items, and seems isn't user definable
+#- name: "[Cornerstone - AWS] Set AZ/CIDR List"
+#  set_fact:
+#    az_cidr_list: "{{ dict(az_list |zip(cornerstone_aws_subnet_cidr_list)) | dict2items }}"
+
+# Assign Subnets to VPC
+- name: "[Cornerstone - AWS] Create and Assign Subnets to VPC per AZ"
+  ec2_vpc_subnet:
+    state: present
+    region: "{{ cornerstone_location }}"
+    vpc_id: "{{ vpc.vpc.id }}"
+    cidr: "{{ item.1 }}"
+    az: "{{ item.0 }}"
+    profile: "{{ cornerstone_aws_profile }}"
+    tags:
+      Project: "{{ cornerstone_prefix }}"
+      name: "{{ cornerstone_prefix }}-{{ item.0 }}"
+  loop: "{{ az_list | zip(cornerstone_aws_subnet_cidr_list) | list }}"
+#  loop: "{{ az_cidr_list|flatten(levels=1) }}"
+#  register: vpc_subnets
+
+# Update Route Tables for IGW
+- name: "[Cornerstone - AWS] Retrieve VPC Route Table"
+  ec2_vpc_route_table_facts:
+    region: "{{ cornerstone_location }}"
+    profile: "{{ cornerstone_aws_profile }}"
+    filters:
+      vpc-id: "{{ vpc.vpc.id }}"
+  register: vpc_route_table
+
+- name: "[Cornerstone - AWS] Update VPC Route Table"
+  ec2_vpc_route_table:
+    state: present
+    lookup: id
+    route_table_id: "{{ vpc_route_table.route_tables[0].id }}"
+    vpc_id: "{{ vpc.vpc.id }}"
+    region: "{{ cornerstone_location }}"
+    profile: "{{ cornerstone_aws_profile }}"
+    tags:
+      Project: "{{ cornerstone_prefix }}"
+      name: "{{ cornerstone_prefix }}-rtb"
+    routes:
+    - dest: 0.0.0.0/0
+      gateway_id: igw
+  register: route_table_output
+
+- name: "[Cornerstone - AWS] Create Security Group"
+  ec2_group:
+    state: present
+    name: "{{ cornerstone_prefix }}-sg"
+    description: "{{ cornerstone_prefix }} Security Group"
+    vpc_id: "{{ vpc.vpc.id }}"
+    region: "{{ cornerstone_location }}"
+    profile: "{{ cornerstone_aws_profile }}"
+    rules:
+      - proto: tcp
+        ports:
+        - 22
+        cidr_ip: 0.0.0.0/0
+        rule_desc: allowSSHin_all
+      - proto: all
+        group_name: "{{ cornerstone_prefix }}-sg"
+        rule_desc: allowAllfromSelf
+    tags:
+      Project: "{{ cornerstone_prefix }}"
+  register: security_group

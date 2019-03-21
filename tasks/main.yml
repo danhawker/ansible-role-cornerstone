@@ -1,0 +1,37 @@
+---
+# tasks file for cornerstone
+
+#
+# -----------------------------------------------------------------------------
+# Common Tasks
+# -----------------------------------------------------------------------------
+#
+- include: common-{{ cornerstone_platform }}.yml
+  tags: [common,"{{ cornerstone_platform }}"]
+
+
+#
+# -----------------------------------------------------------------------------
+# Network Tasks
+# -----------------------------------------------------------------------------
+#
+- include: network-{{ cornerstone_platform }}.yml
+  tags: [network,"{{ cornerstone_platform }}"]
+
+#
+# -----------------------------------------------------------------------------
+# Virtual Machine Tasks
+# -----------------------------------------------------------------------------
+#
+- include: vm-{{ cornerstone_platform }}.yml
+  tags: [vm,"{{ cornerstone_platform }}"]
+
+#
+# -----------------------------------------------------------------------------
+# Discover IP Address Tasks
+# -----------------------------------------------------------------------------
+#
+- include: discover-ip-{{ cornerstone_platform }}.yml
+  tags: ["{{ cornerstone_platform }}"]
+
+# EOF

@@ -1,0 +1,82 @@
+---
+# tasks file for cornerstone:vm-azure.yml
+
+#
+# -----------------------------------------------------------------------------
+# Virtual Machine Tasks
+# -----------------------------------------------------------------------------
+#
+#
+
+# Create the VM (baseline no data disks)
+- name: "[Cornerstone - Azure] Create VM"
+  azure_rm_virtualmachine:
+    resource_group: "{{ cornerstone_azure_resource_group }}"
+    name: "{{ cornerstone_prefix }}-vm"
+    managed_disk_type: "{{ cornerstone_azure_vm_disk_managed }}"
+    vm_size: "{{ cornerstone_vm_flavour }}"
+    admin_username: "{{ cornerstone_ssh_admin_username }}"
+    ssh_password_enabled: false
+    ssh_public_keys:
+      - path: "/home/{{ cornerstone_ssh_admin_username }}/.ssh/authorized_keys"
+        key_data: "{{ cornerstone_ssh_admin_pubkey }}"
+    network_interfaces: "{{ cornerstone_prefix }}-nic"
+    image:
+      offer: "{{ cornerstone_vm_image_offer }}"
+      publisher: "{{ cornerstone_vm_image_publisher }}"
+      sku: "{{ cornerstone_vm_image_sku }}"
+      version: "{{ cornerstone_vm_image_version }}"
+    os_disk_size_gb: "{{ cornerstone_vm_os_disk_size }}"
+  when: not cornerstone_vm_data_disk
+  async: 1000
+  poll: 0
+  register: output_vm
+
+# Check VM is Alive
+- name: "[Cornerstone - Azure] Check VM is Alive"
+  async_status:
+    jid: "{{ output_vm.ansible_job_id }}"
+  when: not cornerstone_vm_data_disk
+  register: vm_result
+  until: vm_result.finished
+  retries: 30
+  delay: 10
+
+
+# Create the VM (baseline with data disk)
+- name: "[Cornerstone - Azure] Create VM + Data Disk"
+  azure_rm_virtualmachine:
+    resource_group: "{{ cornerstone_azure_resource_group }}"
+    name: "{{ cornerstone_prefix }}-vm"
+    managed_disk_type: "{{ cornerstone_azure_vm_disk_managed }}"
+    vm_size: "{{ cornerstone_vm_flavour }}"
+    admin_username: "{{ cornerstone_ssh_admin_username }}"
+    ssh_password_enabled: false
+    ssh_public_keys:
+      - path: "/home/{{ cornerstone_ssh_admin_username }}/.ssh/authorized_keys"
+        key_data: "{{ cornerstone_ssh_admin_pubkey }}"
+    network_interfaces: "{{ cornerstone_prefix }}-nic"
+    image:
+      offer: "{{ cornerstone_vm_image_offer }}"
+      publisher: "{{ cornerstone_vm_image_publisher }}"
+      sku: "{{ cornerstone_vm_image_sku }}"
+      version: "{{ cornerstone_vm_image_version }}"
+    os_disk_size_gb: "{{ cornerstone_vm_os_disk_size }}"
+    data_disks:
+        - lun: 0
+          disk_size_gb: "{{ cornerstone_vm_data_disk_size }}"
+          managed_disk_type: "{{ cornerstone_vm_disk_managed }}"
+  when: cornerstone_vm_data_disk
+  async: 1000
+  poll: 0
+  register: output_vm
+
+# Check VM is Alive
+- name: "[Cornerstone - Azure] Check VM is Alive"
+  async_status:
+    jid: "{{ output_vm.ansible_job_id }}"
+  when: cornerstone_vm_data_disk
+  register: vm_result
+  until: vm_result.finished
+  retries: 30
+  delay: 10

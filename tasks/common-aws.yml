@@ -1,0 +1,22 @@
+---
+# tasks file for cornerstone:common-aws.yml
+
+#
+# -----------------------------------------------------------------------------
+# Common Tasks
+# -----------------------------------------------------------------------------
+# All the other tasks require these tasks
+#
+
+- name: "[Cornerstone - AWS] Create VPC"
+  ec2_vpc_net:
+    state: present
+    cidr_block: "{{ cornerstone_virtual_network_cidr }}"
+    dns_support: true
+    dns_hostnames: true
+    region: "{{ cornerstone_location }}"
+    name: "{{ cornerstone_virtual_network_name }}"
+    profile: "{{ cornerstone_aws_profile }}"
+    tags:
+      Project: "{{ cornerstone_prefix }}"
+  register: vpc

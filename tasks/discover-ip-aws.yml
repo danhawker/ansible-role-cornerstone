@@ -1,0 +1,53 @@
+---
+# tasks file for cornerstone:discover-ip-azure.yml
+
+#
+# -----------------------------------------------------------------------------
+# Discover Virtual Machine IP Address
+# -----------------------------------------------------------------------------
+#
+# AWS: In AWS the ec2_instance_facts module provides all DNS & IP address info,
+# both public and private.
+# If targeting the Public Address (the default) the DNS and IP address are available
+# at vm_data.instances[0]public_dns_name and vm_data.instances[0]public_ip_address
+#
+# Similarly if targeting a Private DNS/IP, these are available at
+# vm_data.instances[0]private_dns_name and vm_data.instances[0]private_ip_address
+#
+
+# Discover Public IP Address of VM
+- name: "[Cornerstone - AWS VM] Discover Public DNS/IP Address"
+  ec2_instance_facts:
+    region: "{{ cornerstone_location }}"
+    profile: "{{ cornerstone_aws_profile }}"
+    filters:
+      "tag:Name": "{{ cornerstone_vm_name }}"
+  register: vm_data
+  tags: ["{{ cornerstone_platform }}"]
+
+# Set Public DNS/IP Address as Fact
+- name: "[Cornerstone - AWS VM] Set Public DNS/IP Address"
+  set_fact:
+      cornerstone_vm_ipaddress: "{{ vm_data.instances[0].public_dns_name }}"
+  when:
+    - vm_data
+    - cornerstone_public_private_ip == "public"
+  tags: ["{{ cornerstone_platform }}"]
+
+# Set Private DNS/IP Address as a Fact
+- name: "[Cornerstone - AWS VM] Set Private DNS/IP Address"
+  set_fact:
+      cornerstone_vm_ipaddress: "{{ vm_data.instances[0].private_dns_name }}"
+  when:
+    - vm_data
+    - cornerstone_public_private_ip == "private"
+  tags: ["{{ cornerstone_platform }}"]
+
+- name: "[Cornerstone - VM] Display DNS/IP Address"
+  debug:
+    msg: "Cornerstone VM {{ cornerstone_public_private_ip}} IP Address: {{ cornerstone_vm_ipaddress }}"
+
+- name: "[Cornerstone - VM] Register IP with Temporary Host Group"
+  add_host:
+    hostname: "{{ cornerstone_vm_ipaddress }}"
+    groupname: "{{ cornerstone_prefix }}"

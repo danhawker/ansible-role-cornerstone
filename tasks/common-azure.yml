@@ -1,0 +1,20 @@
+---
+# tasks file for cornerstone:common-azure.yml
+
+#
+# -----------------------------------------------------------------------------
+# Common Tasks
+# -----------------------------------------------------------------------------
+# All the other tasks require these tasks
+#
+
+- name: "[Cornerstone - Azure] Create a resource group"
+  azure_rm_resourcegroup:
+    name: "{{ cornerstone_azure_resource_group }}"
+    location: "{{ cornerstone_location }}"
+
+- name: "[Cornerstone - Azure] Create virtual network"
+  azure_rm_virtualnetwork:
+    resource_group: "{{ cornerstone_azure_resource_group }}"
+    name: "{{ cornerstone_virtual_network_name }}"
+    address_prefixes: "{{ cornerstone_virtual_network_cidr }}"

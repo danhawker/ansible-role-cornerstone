@@ -1,0 +1,60 @@
+---
+# tasks file for cornerstone:discover-ip-azure.yml
+
+#
+# -----------------------------------------------------------------------------
+# Discover Virtual Machine IP Address
+# -----------------------------------------------------------------------------
+#
+# Azure: If targeting a Public IP Address (the default) the IP address is available
+# by using the azure_rm_publicipaddress_facts module.
+# If targeting a Private IP, these are bound to the VirtualNIC that is bound to the VM
+# so need to use the azure_rm_networkinterface_facts module.
+#
+
+# Discover Public IP Address of VM
+- name: "[Cornerstone - Azure VM] Discover Public IP Address"
+  azure_rm_publicipaddress_facts:
+    resource_group: "{{ cornerstone_azure_resource_group }}"
+    name: "{{ cornerstone_prefix }}-ip"
+  register: public_ip
+  when:
+      cornerstone_public_private_ip == "public"
+  tags: ["{{ cornerstone_platform }}"]
+
+# Set IP Address as Fact
+- name: "[Cornerstone - Azure VM] Set Public IP Address"
+  set_fact:
+      cornerstone_vm_ipaddress: "{{ public_ip.ansible_facts.azure_publicipaddresses[0].properties.ipAddress }}"
+  when:
+    - public_ip
+    - cornerstone_public_private_ip == "public"
+  tags: ["{{ cornerstone_platform }}"]
+
+# Discover Private IP Address of VM
+- name: "[Cornerstone - Azure VM] Discover Private IP Address"
+  azure_rm_networkinterface_facts:
+    resource_group: "{{ cornerstone_azure_resource_group }}"
+    name: "{{ cornerstone_prefix }}-nic"
+  register: nic_data
+  when:
+      cornerstone_public_private_ip == "private"
+  tags: ["{{ cornerstone_platform }}"]
+
+# Set IP Address as a Fact
+- name: "[Cornerstone - Azure VM] Set Private IP Address"
+  set_fact:
+      cornerstone_vm_ipaddress: "{{ nic_data.ansible_facts.azure_networkinterfaces[0].properties.ipConfigurations[0].properties.privateIPAddress }}"
+  when:
+    - nic_data
+    - cornerstone_public_private_ip == "private"
+  tags: ["{{ cornerstone_platform }}"]
+
+- name: "[Cornerstone - VM] Display IP Address"
+  debug:
+    msg: "Cornerstone VM {{ cornerstone_public_private_ip}} IP Address: {{ cornerstone_vm_ipaddress }}"
+
+- name: "[Cornerstone - VM] Register IP with Temporary Host Group"
+  add_host:
+    hostname: "{{ cornerstone_vm_ipaddress }}"
+    groupname: "{{ cornerstone_prefix }}"
