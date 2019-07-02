@@ -23,13 +23,28 @@
     profile: "{{ cornerstone_aws_profile}}"
     filters:
       "tag:Name": "{{ cornerstone_vm_name }}"
+      availability-zone: "{{ cornerstone_az }}"
+      instance-state-name: [ "running", "shutting-down", "stopping", "stopped" ]
   register: vm_data
+
+- name: Debugging absent vms
+  debug:
+    msg: "{{ vm_data.instances[0] }}"
+  when: vm_data.instances
 
 # Set the existing subnet
 - name: "[Cornerstone - AWS] Set Subnet of Existing VM"
   set_fact:
     subnet_id: "{{ vm_data.instances[0].subnet_id }}"
-  when: vm_data.instances
+    instance_id: "{{ vm_data.instances[0].instance_id }}"
+  when: 
+    - vm_data.instances
+    - vm_data.instances[0].state.name != "terminated"
+
+- name: "[Cornerstone - AWS] Set instance_id to -99 if no instance, required for removal of instances"
+  set_fact:
+    instance_id: "-99"
+  when: not vm_data.instances
 
 - name: "[Cornerstone - AWS] Show Existing Subnet ID"
   debug:
@@ -44,23 +59,25 @@
     filters:
       vpc-id: "{{ vpc.vpc.id }}"
   register: vpc_subnets
-  when: not vm_data.instances
+  when: not vm_data.instances 
 
 - name: "[Cornerstone - AWS] Show Available Subnet IDs"
   debug:
     msg: "{{ vpc_subnets.subnets | map(attribute='id') | list }}"
-  when: not vm_data.instances
+  when: not vm_data.instances 
 
 # Pick a random subnet/az to place the VM
 - name: "[Cornerstone - AWS] Set Random Subnet ID"
   set_fact:
     subnet_id: "{{ vpc_subnets.subnets | map(attribute='id') | list | random }}"
-  when: not vm_data.instances
+  when: not vm_data.instances 
 
 # Create the VM (baseline no data disks)
 - name: "[Cornerstone - AWS] Create VM"
   ec2_instance:
     name: "{{ cornerstone_vm_name }}"
+    state: "{{ cornerstone_vm_state }}"
+    instance_ids: "{{ instance_id | default(-99) }}"
     region: "{{ cornerstone_location }}"
     key_name: "{{ cornerstone_aws_ssh_key_name }}"
     security_group: "{{ cornerstone_prefix }}-sg"
@@ -91,6 +108,8 @@
 - name: "[Cornerstone - AWS] Create VM + Data Disk"
   ec2_instance:
     name: "{{ cornerstone_vm_name }}"
+    state: "{{ cornerstone_vm_state }}"
+    instance_ids: "{{ instance_id | default(-99) }}"
     region: "{{ cornerstone_location }}"
     key_name: "{{ cornerstone_aws_ssh_key_name }}"
     security_group: "{{ cornerstone_prefix }}-sg"

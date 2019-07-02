@@ -23,21 +23,41 @@
 # Virtual Machine Tasks
 # -----------------------------------------------------------------------------
 #
+#  include: "vm-{{ item.value.cs_platform }}.yml"
 
-  #- name: Build vms based on dict 
-  #    
-  #    shell: "virt-customize --ssh-inject root:file:/root/.ssh/id_rsa.pub --selinux-relabel -d {{ item.key }}.{{ domain_name }}"
-  #  with_dict: "{{ guests }}"
-
-- include: vm-{{ cornerstone_platform }}.yml
+- name: Build vms based on dict
+  include_tasks: "vm-{{ item.value.cs_platform }}.yml"
+  vars:
+    cornerstone_platform: "{{ item.value.cs_platform }}"
+    cornerstone_vm_name: "{{ item.value.cs_vm_name }}"
+    cornerstone_vm_state: "{{ item.value.cs_vm_state }}"
+    cornerstone_location: "{{ item.value.cs_location }}"
+    cornerstone_az: "{{ item.value.cs_az }}"
+    cornerstone_vm_flavour: "{{ item.value.cs_vm_flavour }}"
+    cornerstone_vm_aws_ami: "{{ item.value.cs_vm_aws_ami }}"
+    cornerstone_virtual_network_name: "{{ item.value.cs_virtual_network_name }}"
+    cornerstone_virtual_network_cidr: "{{ item.value.cs_virtual_network_cidr }}"
+    cornerstone_subnet_name: "{{ item.value.cs_subnet_name }}"
+    cornerstone_public_private_ip: "{{ item.value.cs_public_private_ip }}"
+    cornerstone_publicip_allocation_method: "{{ item.value.cs_publicip_allocation_method }}"
+    cornerstone_publicip_domain_name: "{{ item.value.cs_publicip_domain_name }}"
+  with_dict: "{{ guests }}"  
   tags: [vm, "{{ cornerstone_platform }}"]
+
+
+  #tags: [vm, "{{ item.value.cs_platform }}"]
+
+  #- include: vm-{{ cornerstone_platform }}.yml
+  #  tags: [vm, "{{ cornerstone_platform }}"]
+
 
 #
 # -----------------------------------------------------------------------------
 # Discover IP Address Tasks
 # -----------------------------------------------------------------------------
 #
+
 - include: discover-ip-{{ cornerstone_platform }}.yml
   tags: ["{{ cornerstone_platform }}"]
-
+  when: 'cornerstone_vm_state != "absent"'
 # EOF
