@@ -23,6 +23,12 @@
 # Virtual Machine Tasks
 # -----------------------------------------------------------------------------
 #
+
+  #- name: Build vms based on dict 
+  #    
+  #    shell: "virt-customize --ssh-inject root:file:/root/.ssh/id_rsa.pub --selinux-relabel -d {{ item.key }}.{{ domain_name }}"
+  #  with_dict: "{{ guests }}"
+
 - include: vm-{{ cornerstone_platform }}.yml
   tags: [vm, "{{ cornerstone_platform }}"]
 
