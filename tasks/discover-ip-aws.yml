@@ -56,3 +56,26 @@
     groupname: "{{ cornerstone_prefix }}"
   when:
     - vm_data.instances
+
+- name: "[Cornerstone - VM] Register IP with Temporary Host Group named after the Purpose tag"
+  add_host:
+    hostname: "{{ cornerstone_vm_ipaddress }}"
+    groupname: "{{ cornerstone_tag_purpose }}"
+  when:   
+    - vm_data.instances
+    - cornerstone_tag_purpose
+
+- name: "[Cornerstone - VM] Register IP with Temporary Host Group named after the Role tag"
+  add_host:
+    hostname: "{{ cornerstone_vm_ipaddress }}"
+    groupname: "{{ cornerstone_tag_role }}"
+  when:
+    - vm_data.instances
+    - cornerstone_tag_role
+
+
+
+
+
+
+
