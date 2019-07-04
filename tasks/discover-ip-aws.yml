@@ -22,6 +22,7 @@
     profile: "{{ cornerstone_aws_profile }}"
     filters:
       "tag:Name": "{{ cornerstone_vm_name }}"
+      instance-state-name: [ "running", "shutting-down", "stopping", "stopped" ]
   register: vm_data
   tags: ["{{ cornerstone_platform }}"]
 
@@ -30,7 +31,7 @@
   set_fact:
       cornerstone_vm_ipaddress: "{{ vm_data.instances[0].public_dns_name }}"
   when:
-    - vm_data
+    - vm_data.instances
     - cornerstone_public_private_ip == "public"
   tags: ["{{ cornerstone_platform }}"]
 
@@ -39,15 +40,19 @@
   set_fact:
       cornerstone_vm_ipaddress: "{{ vm_data.instances[0].private_dns_name }}"
   when:
-    - vm_data
+    - vm_data.instances
     - cornerstone_public_private_ip == "private"
   tags: ["{{ cornerstone_platform }}"]
 
 - name: "[Cornerstone - VM] Display DNS/IP Address"
   debug:
     msg: "Cornerstone VM {{ cornerstone_public_private_ip }} IP Address: {{ cornerstone_vm_ipaddress }}"
+  when:
+    - vm_data.instances
 
 - name: "[Cornerstone - VM] Register IP with Temporary Host Group"
   add_host:
     hostname: "{{ cornerstone_vm_ipaddress }}"
     groupname: "{{ cornerstone_prefix }}"
+  when:
+    - vm_data.instances

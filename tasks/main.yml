@@ -23,32 +23,33 @@
 # Virtual Machine Tasks
 # -----------------------------------------------------------------------------
 #
-#  include: "vm-{{ item.value.cs_platform }}.yml"
+#  include: "vm-{{ item.value.cornerstone_platform }}.yml"
 
 - name: Build vms based on dict
-  include_tasks: "vm-{{ item.value.cs_platform }}.yml"
+  include_tasks: "vm-{{ item.value.cornerstone_platform }}.yml"
   vars:
-    cornerstone_platform: "{{ item.value.cs_platform }}"
-    cornerstone_vm_name: "{{ item.value.cs_vm_name }}"
-    cornerstone_vm_state: "{{ item.value.cs_vm_state }}"
-    cornerstone_location: "{{ item.value.cs_location }}"
-    cornerstone_az: "{{ item.value.cs_az }}"
-    cornerstone_vm_flavour: "{{ item.value.cs_vm_flavour }}"
-    cornerstone_vm_aws_ami: "{{ item.value.cs_vm_aws_ami }}"
-    cornerstone_virtual_network_name: "{{ item.value.cs_virtual_network_name }}"
-    cornerstone_virtual_network_cidr: "{{ item.value.cs_virtual_network_cidr }}"
-    cornerstone_subnet_name: "{{ item.value.cs_subnet_name }}"
-    cornerstone_public_private_ip: "{{ item.value.cs_public_private_ip }}"
-    cornerstone_publicip_allocation_method: "{{ item.value.cs_publicip_allocation_method }}"
-    cornerstone_publicip_domain_name: "{{ item.value.cs_publicip_domain_name }}"
+    cornerstone_platform: "{{ item.value.cornerstone_platform }}"
+    cornerstone_tag_purpose: "{{ item.value.cornerstone_tag_purpose }}"
+    cornerstone_tag_role: "{{ item.value.cornerstone_tag_role }}"
+    cornerstone_vm_name: "{{ item.value.cornerstone_vm_name }}"
+    cornerstone_vm_state: "{{ item.value.cornerstone_vm_state }}"
+    cornerstone_location: "{{ item.value.cornerstone_location }}"
+    cornerstone_vm_aws_az: "{{ item.value.cornerstone_vm_aws_az }}"
+    cornerstone_vm_flavour: "{{ item.value.cornerstone_vm_flavour }}"
+    cornerstone_vm_aws_ami: "{{ item.value.cornerstone_vm_aws_ami }}"
+    cornerstone_virtual_network_name: "{{ item.value.cornerstone_virtual_network_name }}"
+    cornerstone_virtual_network_cidr: "{{ item.value.cornerstone_virtual_network_cidr }}"
+    cornerstone_subnet_name: "{{ item.value.cornerstone_subnet_name }}"
+    cornerstone_vm_assign_public_ip: "{{ item.value.cornerstone_vm_assign_public_ip }}"
+    cornerstone_public_private_ip: "{{ item.value.cornerstone_public_private_ip }}"
+    cornerstone_publicip_allocation_method: "{{ item.value.cornerstone_publicip_allocation_method }}"
+    cornerstone_publicip_domain_name: "{{ item.value.cornerstone_publicip_domain_name }}"
+    cornerstone_vm_data_disk: "{{ item.value.cornerstone_vm_data_disk }}"
+    cornerstone_vm_data_disk_device_name: "{{ item.value.cornerstone_vm_data_disk_device_name }}"
+    cornerstone_aws_vm_data_disk_managed: "{{ item.value.cornerstone_aws_vm_data_disk_managed }}"
+    cornerstone_vm_data_disk_size: "{{ item.value.cornerstone_vm_data_disk_size }}"
   with_dict: "{{ guests }}"  
   tags: [vm, "{{ cornerstone_platform }}"]
-
-
-  #tags: [vm, "{{ item.value.cs_platform }}"]
-
-  #- include: vm-{{ cornerstone_platform }}.yml
-  #  tags: [vm, "{{ cornerstone_platform }}"]
 
 
 #
@@ -56,8 +57,30 @@
 # Discover IP Address Tasks
 # -----------------------------------------------------------------------------
 #
-
-- include: discover-ip-{{ cornerstone_platform }}.yml
+- name: Discover IP address tasks
+  include: discover-ip-{{ cornerstone_platform }}.yml
+  vars:
+    cornerstone_platform: "{{ item.value.cornerstone_platform }}"
+    cornerstone_tag_purpose: "{{ item.value.cornerstone_tag_purpose }}"
+    cornerstone_tag_role: "{{ item.value.cornerstone_tag_role }}"
+    cornerstone_vm_name: "{{ item.value.cornerstone_vm_name }}"
+    cornerstone_vm_state: "{{ item.value.cornerstone_vm_state }}"
+    cornerstone_location: "{{ item.value.cornerstone_location }}"
+    cornerstone_vm_aws_az: "{{ item.value.cornerstone_vm_aws_az }}"
+    cornerstone_vm_flavour: "{{ item.value.cornerstone_vm_flavour }}"
+    cornerstone_vm_aws_ami: "{{ item.value.cornerstone_vm_aws_ami }}"
+    cornerstone_virtual_network_name: "{{ item.value.cornerstone_virtual_network_name }}"
+    cornerstone_virtual_network_cidr: "{{ item.value.cornerstone_virtual_network_cidr }}"
+    cornerstone_subnet_name: "{{ item.value.cornerstone_subnet_name }}"
+    cornerstone_vm_assign_public_ip: "{{ item.value.cornerstone_vm_assign_public_ip }}"
+    cornerstone_public_private_ip: "{{ item.value.cornerstone_public_private_ip }}"
+    cornerstone_publicip_allocation_method: "{{ item.value.cornerstone_publicip_allocation_method }}"
+    cornerstone_publicip_domain_name: "{{ item.value.cornerstone_publicip_domain_name }}"
+    cornerstone_vm_data_disk: "{{ item.value.cornerstone_vm_data_disk }}"
+    cornerstone_vm_data_disk_device_name: "{{ item.value.cornerstone_vm_data_disk_device_name }}"
+    cornerstone_aws_vm_data_disk_managed: "{{ item.value.cornerstone_aws_vm_data_disk_managed }}"
+    cornerstone_vm_data_disk_size: "{{ item.value.cornerstone_vm_data_disk_size }}"
+  with_dict: "{{ guests }}"
   tags: ["{{ cornerstone_platform }}"]
-  when: 'cornerstone_vm_state != "absent"'
+
 # EOF
