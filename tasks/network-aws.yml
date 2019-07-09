@@ -75,23 +75,34 @@
       gateway_id: igw
   register: route_table_output
 
+- set_fact:
+    from_template: "{{ lookup('template', '../templates/sg_rules_template.j2') }}"
+  vars:
+    to_cornerstone_template_aws_sg: "{{ cornerstone_sg }}"
+
 - name: "[Cornerstone - AWS] Create Security Group"
   ec2_group:
+    name: "{{ item.name }}"
+    description: "{{ item.description }}"
+    region: "{{ item.region }}"
     state: present
-    name: "{{ cornerstone_prefix }}-sg"
-    description: "{{ cornerstone_prefix }} Security Group"
-    vpc_id: "{{ vpc.vpc.id }}"
-    region: "{{ cornerstone_location }}"
-    profile: "{{ cornerstone_aws_profile }}"
-    rules:
-      - proto: tcp
-        ports:
-        - 22
-        cidr_ip: 0.0.0.0/0
-        rule_desc: allowSSHin_all
-      - proto: all
-        group_name: "{{ cornerstone_prefix }}-sg"
-        rule_desc: allowAllfromSelf
-    tags:
-      Project: "{{ cornerstone_prefix }}"
-  register: security_group
+    rules: "{{ item.rules }}"
+  with_items: "{{ from_template.cornerstone_sg }}"
+
+  #- name: "[Cornerstone - AWS] Create Security Group"
+  #  ec2_group:
+  #    state: present
+  #    name: "{{ cornerstone_prefix }}-sg"
+  #    description: "{{ cornerstone_prefix }} Security Group"
+  #    vpc_id: "{{ vpc.vpc.id }}"
+  #    region: "{{ cornerstone_location }}"
+  #    profile: "{{ cornerstone_aws_profile }}"
+  #    rules:
+  #      - proto: all
+  #        group_name: "{{ cornerstone_prefix }}-sg"
+  #        rule_desc: allowAllfromSelf
+  #    tags:
+  #      Project: "{{ cornerstone_prefix }}"
+  #  register: security_group
+
+ 

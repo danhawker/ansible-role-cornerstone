@@ -84,6 +84,10 @@
     vpc_subnet_id: "{{ subnet_id }}"
     instance_type: "{{ cornerstone_vm_flavour }}"
     image_id: "{{ cornerstone_vm_aws_ami }}"
+    volumes:
+      - device_name: /dev/sda1
+        ebs:
+          volume_size: "{{ cornerstone_vm_root_disk_size }}"
     network:
       assign_public_ip: "{{ cornerstone_vm_assign_public_ip }}" 
     profile: "{{ cornerstone_aws_profile }}"

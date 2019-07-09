@@ -44,6 +44,7 @@
     cornerstone_public_private_ip: "{{ item.value.cornerstone_public_private_ip }}"
     cornerstone_publicip_allocation_method: "{{ item.value.cornerstone_publicip_allocation_method }}"
     cornerstone_publicip_domain_name: "{{ item.value.cornerstone_publicip_domain_name }}"
+    cornerstone_vm_os_disk_size: "{{ item.value.cornerstone_vm_os_disk_size }}"
     cornerstone_vm_data_disk: "{{ item.value.cornerstone_vm_data_disk }}"
     cornerstone_vm_data_disk_device_name: "{{ item.value.cornerstone_vm_data_disk_device_name }}"
     cornerstone_aws_vm_data_disk_managed: "{{ item.value.cornerstone_aws_vm_data_disk_managed }}"

@@ -54,6 +54,9 @@
   add_host:
     hostname: "{{ cornerstone_vm_ipaddress }}"
     groupname: "{{ cornerstone_prefix }}"
+    ansible_ssh_user: "{{ cornerstone_ssh_user }}"
+    ansible_ssh_private_key_file: "{{ cornerstone_ssh_key_path }}"
+    ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
   when:
     - vm_data.instances
 
@@ -61,17 +64,23 @@
   add_host:
     hostname: "{{ cornerstone_vm_ipaddress }}"
     groupname: "{{ cornerstone_tag_purpose }}"
+    ansible_ssh_user: "{{ cornerstone_ssh_user }}"
+    ansible_ssh_private_key_file: "{{ cornerstone_ssh_key_path }}"
+    ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
   when:   
     - vm_data.instances
-    - cornerstone_tag_purpose
+    - cornerstone_tag_purpose != ""
 
 - name: "[Cornerstone - VM] Register IP with Temporary Host Group named after the Role tag"
   add_host:
     hostname: "{{ cornerstone_vm_ipaddress }}"
     groupname: "{{ cornerstone_tag_role }}"
+    ansible_ssh_user: ec2-user
+    ansible_ssh_private_key_file: /home/ken/.ssh/ken-sshkey.pem
+    ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
   when:
     - vm_data.instances
-    - cornerstone_tag_role
+    - cornerstone_tag_role != ""
 
 
 

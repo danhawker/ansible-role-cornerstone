@@ -34,7 +34,9 @@ Available variables are listed below, along with default values (see defaults/ma
     cornerstone_ssh_admin_pubkey: <add_your_ssh_public_key_data>
     # The AWS SSH Key to use. Must be pre-created in AWS
     cornerstone_aws_ssh_key_name: mykey
-    
+    cornerstone_ssh_user: ec2-user
+    cornerstone_ssh_key_path: "/home/user/.ssh/userssh.pem"   
+ 
     # API Credentials
     # What Boto profile to use for AWS
     cornerstone_aws_profile: myprofile
@@ -62,11 +64,37 @@ Available variables are listed below, along with default values (see defaults/ma
       - "10.1.32.0/20"
 
     # Private or Public IP
-    cornerstone_vm_assign_public_ip: true
+``  cornerstone_vm_assign_public_ip: true
     cornerstone_public_private_ip: public
     cornerstone_publicip_allocation_method: Dynamic
     cornerstone_publicip_domain_name: null
-
+``
+    # Cornerstone Rules to maintain, this is the list that will 
+    # determine which rules are enabled for the security group.
+``  cornerstone_sg:
+      - name: "cs-sg"
+	description: Security group for aws
+	region: "{{ cornerstone_location }}"
+	rules:
+	  - proto: tcp
+	    from_port: 22
+	    to_port: 22
+	    group_name: ""
+	    cidr_ip: 0.0.0.0/0
+	    rule_desc: "allowSSHin_all"
+	  - proto: tcp
+	    from_port: 443
+	    to_port: 443
+	    group_name: ""
+	    cidr_ip: 0.0.0.0/0
+	    rule_desc: "allowHttpsin_all"
+	  - proto: all
+	    from_port: ""
+	    to_port: ""
+	    group_name: "cs-sg"
+	    cidr_ip: 0.0.0.0/0
+	    rule_desc: "allowAllfromSelf"
+``
     # Virtual Machine
     cornerstone_vm_flavour: Standard_D2s_v3
     # AWS AMI Image ID
