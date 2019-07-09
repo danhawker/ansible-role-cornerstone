@@ -21,7 +21,11 @@ Available variables are listed below, along with default values (see defaults/ma
 
     # Prefix - What prefix for objects to use. Eg myenv, myapp, etc
     cornerstone_prefix: cornerstone
-    
+   
+    # Tags - Tags that can be used.
+    cornerstone_tag_purpose: "Openshift"
+    cornerstone_tag_role: "Master"    
+ 
     # Cornerstone VM Name
     cornerstone_vm_name: "{{ cornerstone_prefix }}-vm"
 
@@ -30,7 +34,9 @@ Available variables are listed below, along with default values (see defaults/ma
     cornerstone_ssh_admin_pubkey: <add_your_ssh_public_key_data>
     # The AWS SSH Key to use. Must be pre-created in AWS
     cornerstone_aws_ssh_key_name: mykey
-    
+    cornerstone_ssh_user: ec2-user
+    cornerstone_ssh_key_path: "/home/user/.ssh/userssh.pem"   
+ 
     # API Credentials
     # What Boto profile to use for AWS
     cornerstone_aws_profile: myprofile
@@ -58,10 +64,37 @@ Available variables are listed below, along with default values (see defaults/ma
       - "10.1.32.0/20"
 
     # Private or Public IP
+``  cornerstone_vm_assign_public_ip: true
     cornerstone_public_private_ip: public
     cornerstone_publicip_allocation_method: Dynamic
     cornerstone_publicip_domain_name: null
-
+``
+    # Cornerstone Rules to maintain, this is the list that will 
+    # determine which rules are enabled for the security group.
+``  cornerstone_sg:
+      - name: "cs-sg"
+	description: Security group for aws
+	region: "{{ cornerstone_location }}"
+	rules:
+	  - proto: tcp
+	    from_port: 22
+	    to_port: 22
+	    group_name: ""
+	    cidr_ip: 0.0.0.0/0
+	    rule_desc: "allowSSHin_all"
+	  - proto: tcp
+	    from_port: 443
+	    to_port: 443
+	    group_name: ""
+	    cidr_ip: 0.0.0.0/0
+	    rule_desc: "allowHttpsin_all"
+	  - proto: all
+	    from_port: ""
+	    to_port: ""
+	    group_name: "cs-sg"
+	    cidr_ip: 0.0.0.0/0
+	    rule_desc: "allowAllfromSelf"
+``
     # Virtual Machine
     cornerstone_vm_flavour: Standard_D2s_v3
     # AWS AMI Image ID
@@ -78,11 +111,18 @@ Available variables are listed below, along with default values (see defaults/ma
     # Type of managed disk (Azure)
     cornerstone_azure_vm_disk_managed: Standard_LRS
     # Base OS Disk Size (Standard AWS base is 10GB, Azure is 32GB)
-    # FIXME: only works for Azure hosts currently
     cornerstone_vm_os_disk_size: 32
     # Do we want a separate data disk?
     cornerstone_vm_data_disk: false
+    
     # How large?
+    #### IMPORTANT #####################################################
+    # AWS ec2_instance module for ansible 2.7+ currently has a problem #
+    # with converting strings to ints for disk size.                   #
+    # To resolve add the code mentioned in                             #
+    # https://github.com/ansible/ansible/pull/55716/files              #
+    ####################################################################
+
     cornerstone_vm_data_disk_size: 64
 
 Dependencies
@@ -90,18 +130,68 @@ Dependencies
 
 Not a dependency per-se, but used alongside Finial, can subscribe RHEL systems to the Red Hat Network.
 
+For AWS deployments the aws_cli is required. Role for this can be found at https://github.com/kenhitchcock/ansible-role-awscli
+
 Example Playbook
 ----------------
 
+# For and AWS deployment this will work for multiple instances.
     - hosts: localhost
       vars:
-        cornerstone_platform: azure
-        cornerstone_prefix: cornerstone
-        cornerstone_location: uksouth
-        cornerstone_vm_flavour: Standard_B1ms
+        guests:
+          aws-instance01:
+            cs_platform: aws
+            cs_tag_purpose: "Openshift"
+            cs_tag_role: "Master"
+            cs_vm_name: aws-instance01
+            cs_vm_state: present
+            cs_location: eu-west-2
+            cs_vm_aws_az: eu-west-2a
+            cs_vm_flavour: t2.micro
+            cs_vm_aws_ami: ami-051fb39c3a16c8a85
+            cs_virtual_network_name: "{{ cornerstone_prefix }}vnet"
+            cs_virtual_network_cidr: "10.1.0.0/16"
+            cs_subnet_name: "{{ cornerstone_prefix }}subnet"
+            cs_public_private_ip: public
+            cs_vm_assign_public_ip: true
+            cs_publicip_allocation_method: Dynamic
+            cs_publicip_domain_name: null
+            cs_vm_data_disk: true
+            cs_vm_data_disk_device_name: "/dev/sdb"
+            cs_vm_data_disk_size: "15"
+          aws-instance02:
+            cs_platform: aws
+            cs_tag_purpose: "Openshift"
+            cs_tag_role: "Master"
+            cs_vm_name: aws-instance02
+            cs_vm_state: present
+            cs_location: eu-west-2
+            cs_vm_aws_az: eu-west-2b
+            cs_vm_flavour: t2.micro
+            cs_vm_aws_ami: ami-051fb39c3a16c8a85
+            cs_virtual_network_name: "{{ cornerstone_prefix }}vnet"
+            cs_virtual_network_cidr: "10.1.0.0/16"
+            cs_subnet_name: "{{ cornerstone_prefix }}subnet"
+            cs_public_private_ip: public
+            cs_vm_assign_public_ip: true
+            cs_publicip_allocation_method: Dynamic
+            cs_publicip_domain_name: null
+            cs_vm_data_disk: true
+            cs_vm_data_disk_device_name: "/dev/sdb"
+            cs_vm_data_disk_size: "15"
 
       roles:
          - role: danhawker.cornerstone
+
+# For Azure you cannot use the guest layout yet. The task will only create one instance at a time.
+
+Future Releases
+---------------
+
+ - Add support for Libvirt
+ - Add support for VSphere
+ - Add support for RHEV
+ - Add support for OpenStack
 
 License
 -------

@@ -1,0 +1,28 @@
+{
+  "cornerstone_sg": [
+    {% for cornerstone_sg in to_cornerstone_template_aws_sg %}
+    {
+      "description": "{{ cornerstone_sg.description }}",
+      "name": "{{ cornerstone_sg.name }}",
+      "region": "{{ cornerstone_sg.region }}",
+      "rules": [
+        {% for rule in cornerstone_sg.rules %}
+        {
+          "proto": "{{ rule.proto }}",
+	  {% if rule.from_port != "" %}
+          "cidr_ip": "{{ rule.cidr_ip }}",
+          "from_port": "{{ rule.from_port }}",
+          "to_port": "{{ rule.to_port }}",
+          {% endif %}
+          {% if rule.group_name != "" %} 
+          "group_name": "{{ rule.group_name }}",
+          {% endif %}
+          "rule_desc": "{{ rule.rule_desc }}"
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+
