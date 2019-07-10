@@ -23,13 +23,27 @@
     profile: "{{ cornerstone_aws_profile}}"
     filters:
       "tag:Name": "{{ cornerstone_vm_name }}"
+      "tag:Project": "{{ cornerstone_prefix }}"
+      instance-state-name: [ "running", "shutting-down", "stopping", "stopped" ]
   register: vm_data
 
+  #- name: debugging
+  #  debug:
+  #    msg: "{{ vm_data }}"
+
+
 # Set the existing subnet
-- name: "[Cornerstone - AWS] Set Subnet of Existing VM"
+- name: "[Cornerstone - AWS] Set Instance_ID of Existing VM"
   set_fact:
     subnet_id: "{{ vm_data.instances[0].subnet_id }}"
-  when: vm_data.instances
+    instance_id: "{{ vm_data.instances[0].instance_id }}"
+  when: 
+    - vm_data.instances
+
+- name: "[Cornerstone - AWS] Set instance_id to -99 if no instance, required for removal of instances"
+  set_fact:
+    instance_id: "-99"
+  when: not vm_data.instances
 
 - name: "[Cornerstone - AWS] Show Existing Subnet ID"
   debug:
@@ -43,38 +57,46 @@
     profile: "{{ cornerstone_aws_profile}}"
     filters:
       vpc-id: "{{ vpc.vpc.id }}"
+      "tag:name": "{{ cornerstone_prefix }}-{{ cornerstone_vm_aws_az }}"
   register: vpc_subnets
-  when: not vm_data.instances
+  when: not vm_data.instances 
 
 - name: "[Cornerstone - AWS] Show Available Subnet IDs"
   debug:
     msg: "{{ vpc_subnets.subnets | map(attribute='id') | list }}"
-  when: not vm_data.instances
+  when: not vm_data.instances 
 
-# Pick a random subnet/az to place the VM
+# Used to Pick a random subnet/az to place the VM but now there is only one subnet given, so nothing random about one.
 - name: "[Cornerstone - AWS] Set Random Subnet ID"
   set_fact:
     subnet_id: "{{ vpc_subnets.subnets | map(attribute='id') | list | random }}"
-  when: not vm_data.instances
+  when: not vm_data.instances 
 
 # Create the VM (baseline no data disks)
-- name: "[Cornerstone - AWS] Create VM"
+- name: "[Cornerstone - AWS] Create/Delete VM - {{ cornerstone_vm_name }}"
   ec2_instance:
     name: "{{ cornerstone_vm_name }}"
+    state: "{{ cornerstone_vm_state }}"
+    instance_ids: "{{ instance_id | default(-99) }}"
     region: "{{ cornerstone_location }}"
     key_name: "{{ cornerstone_aws_ssh_key_name }}"
     security_group: "{{ cornerstone_prefix }}-sg"
-    # Set the subnet to existing or random subnet_id
     vpc_subnet_id: "{{ subnet_id }}"
     instance_type: "{{ cornerstone_vm_flavour }}"
     image_id: "{{ cornerstone_vm_aws_ami }}"
+    volumes:
+      - device_name: /dev/sda1
+        ebs:
+          volume_size: "{{ cornerstone_vm_os_disk_size }}"
     network:
-      assign_public_ip: true
+      assign_public_ip: "{{ cornerstone_vm_assign_public_ip }}" 
     profile: "{{ cornerstone_aws_profile }}"
     tags:
       Project: "{{ cornerstone_prefix }}"
+      Purpose: "{{ cornerstone_tag_purpose }}"
+      Role: "{{ cornerstone_tag_role }}"
   when: not cornerstone_vm_data_disk
-  register: output_vm
+  register: output_vm_"{{ cornerstone_vm_name }}"
 
 # Check VM is Alive
 # The ec2_instance module has a wait functions built in, so no need.
@@ -88,25 +110,33 @@
 #  delay: 10
 
 # Create the VM (baseline with data disk)
-- name: "[Cornerstone - AWS] Create VM + Data Disk"
+- name: "[Cornerstone - AWS] Create/Delete VM - {{ cornerstone_vm_name }} + Data Disk"
   ec2_instance:
     name: "{{ cornerstone_vm_name }}"
+    state: "{{ cornerstone_vm_state }}"
+    instance_ids: "{{ instance_id | default(-99) }}"
     region: "{{ cornerstone_location }}"
     key_name: "{{ cornerstone_aws_ssh_key_name }}"
     security_group: "{{ cornerstone_prefix }}-sg"
-    # Pick a random subnet/az to place the VM
-    vpc_subnet_id: "{{ vpc_subnets.subnets | map(attribute='id') | list | random }}"
+    vpc_subnet_id: "{{ subnet_id }}"
     instance_type: "{{ cornerstone_vm_flavour }}"
     image_id: "{{ cornerstone_vm_aws_ami }}"
     network:
-      assign_public_ip: true
+      assign_public_ip: "{{ cornerstone_vm_assign_public_ip }}" 
     profile: "{{ cornerstone_aws_profile }}"
+    volumes:
+      - device_name: /dev/sda1
+        ebs:
+          volume_size: "{{ cornerstone_vm_os_disk_size }}"
+      - device_name: "{{ cornerstone_vm_data_disk_device_name }}"
+        ebs:
+          volume_size: "{{ cornerstone_vm_data_disk_size }}" 
+          delete_on_termination: true
     tags:
       Project: "{{ cornerstone_prefix }}"
-    volumes:
-      - device_name: /dev/sdb
-        volume_type: "{{ cornerstone_aws_vm_disk_managed }}"
-        volume_size: "{{ cornerstone_vm_data_disk_size }}"
-        delete_on_termination: true
+      Purpose: "{{ cornerstone_tag_purpose }}"
+      Role: "{{ cornerstone_tag_role }}"
   when: cornerstone_vm_data_disk
-  register: output_vm
+  register: output_vm_"{{ cornerstone_vm_name }}"
+
+#delete_on_termination: true
