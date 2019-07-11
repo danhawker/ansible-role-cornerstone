@@ -68,6 +68,7 @@
     ansible_ssh_private_key_file: "{{ cornerstone_ssh_key_path }}"
     ansible_ssh_extra_args: "{{ cornerstone_ssh_extra_args }}"
     ansible_python_interpreter: "{{ ansible_python_interpreter }}"
+    ansible_connection: "local"
   when:   
     - vm_data.instances
     - cornerstone_tag_purpose != ""
@@ -80,6 +81,7 @@
     ansible_ssh_private_key_file: /home/ken/.ssh/ken-sshkey.pem
     ansible_ssh_extra_args: "{{ cornerstone_ssh_extra_args }}"
     ansible_python_interpreter: "{{ ansible_python_interpreter }}"
+    ansible_connection: "local"
   when:
     - vm_data.instances
     - cornerstone_tag_role != ""
