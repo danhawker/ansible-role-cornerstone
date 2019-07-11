@@ -35,7 +35,11 @@ Available variables are listed below, along with default values (see defaults/ma
     # The AWS SSH Key to use. Must be pre-created in AWS
     cornerstone_aws_ssh_key_name: mykey
     cornerstone_ssh_user: ec2-user
-    cornerstone_ssh_key_path: "/home/user/.ssh/userssh.pem"   
+    cornerstone_ssh_key_path: "/home/user/.ssh/userssh.pem" 
+    # Extra args added for ssh configuration, default value adds
+    # StrictHostKeyChecking=no
+    cornerstone_ssh_extra_args: "-o StrictHostKeyChecking=no"
+
  
     # API Credentials
     # What Boto profile to use for AWS
