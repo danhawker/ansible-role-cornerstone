@@ -139,4 +139,24 @@
   when: cornerstone_vm_data_disk
   register: output_vm_"{{ cornerstone_vm_name }}"
 
-#delete_on_termination: true
+# Associate Elastic IP with instance, if EIP has been precreated. 
+- name: "associate new elastic IPs with each of the instances"
+  block:
+    - name: "[Cornerstone - AWS] Check for Existing VM"
+      ec2_instance_facts:
+        region: "{{ cornerstone_location }}"
+        profile: "{{ cornerstone_aws_profile}}"
+        filters:
+          "tag:Name": "{{ cornerstone_vm_name }}"
+          "tag:Project": "{{ cornerstone_prefix }}"
+          instance-state-name: [ "running", "shutting-down", "stopping", "stopped" ]
+      register: createdvm_data
+   
+    - name: "Assign elastic ip"
+      ec2_eip:
+        region: "{{ cornerstone_location }}"
+        public_ip: "{{ cornerstone_vm_public_ip }}"
+        device_id: "{{ createdvm_data.instances[0].instance_id }}"
+        state: present
+  when:
+    - cornerstone_vm_public_ip is defined

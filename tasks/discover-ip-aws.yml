@@ -81,11 +81,3 @@
   when:
     - vm_data.instances
     - cornerstone_tag_role != ""
-
-
-
-
-
-      #    ansible_python_interpreter: "/usr/bin/python"
-      #    ansible_connection: "ssh"
-

@@ -69,6 +69,7 @@ Available variables are listed below, along with default values (see defaults/ma
 
     # Private or Public IP
     cornerstone_vm_assign_public_ip: true
+    cornerstone_vm_public_ip: <elastic ip precreated>
     cornerstone_public_private_ip: public
     cornerstone_publicip_allocation_method: Dynamic
     cornerstone_publicip_domain_name: null
