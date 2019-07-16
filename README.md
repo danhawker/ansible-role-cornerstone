@@ -110,6 +110,9 @@ Available variables are listed below, along with default values (see defaults/ma
     cornerstone_vm_image_sku: 7-RAW
     cornerstone_vm_image_version: latest
 
+    # Security group to use, if not specified, default will be used.
+    cornerstone_vm_aws_sg: 
+
     # Disks
     # Type of managed disk (AWS)
     cornerstone_aws_vm_disk_managed: gp2
@@ -177,6 +180,7 @@ Example Playbook
             cornerstone_vm_aws_az: eu-west-2a
             cornerstone_vm_flavour: t2.micro
             cornerstone_vm_aws_ami: ami-051fb39c3a16c8a85
+            cornerstone_vm_aws_sg: "cs-sg"
             cornerstone_virtual_network_name: "{{ cornerstone_prefix }}vnet"
             cornerstone_virtual_network_cidr: "10.1.0.0/16"
             cornerstone_subnet_name: "{{ cornerstone_prefix }}subnet"
@@ -198,6 +202,7 @@ Example Playbook
             cornerstone_vm_aws_az: eu-west-2b
             cornerstone_vm_flavour: t2.micro
             cornerstone_vm_aws_ami: ami-051fb39c3a16c8a85
+            cornerstone_vm_aws_sg: "cs-sg"
             cornerstone_virtual_network_name: "{{ cornerstone_prefix }}vnet"
             cornerstone_virtual_network_cidr: "10.1.0.0/16"
             cornerstone_subnet_name: "{{ cornerstone_prefix }}subnet"
@@ -232,3 +237,4 @@ Author Information
 ------------------
 
 Dan Hawker [Github](https://github.com/danhawker)
+Ken Hitchcock - Contributor
