@@ -69,6 +69,7 @@ Available variables are listed below, along with default values (see defaults/ma
 
     # Private or Public IP
     cornerstone_vm_assign_public_ip: true
+    cornerstone_vm_public_ip: <elastic ip precreated>
     cornerstone_public_private_ip: public
     cornerstone_publicip_allocation_method: Dynamic
     cornerstone_publicip_domain_name: null
@@ -108,6 +109,9 @@ Available variables are listed below, along with default values (see defaults/ma
     cornerstone_vm_image_publisher: RedHat
     cornerstone_vm_image_sku: 7-RAW
     cornerstone_vm_image_version: latest
+
+    # Security group to use, if not specified, default will be used.
+    cornerstone_vm_aws_sg: 
 
     # Disks
     # Type of managed disk (AWS)
@@ -167,45 +171,49 @@ Example Playbook
 	        rule_desc: "allowAllfromSelf"
         guests:
           aws-instance01:
-            cs_platform: aws
-            cs_tag_purpose: "Openshift"
-            cs_tag_role: "Master"
-            cs_vm_name: aws-instance01
-            cs_vm_state: present
-            cs_location: eu-west-2
-            cs_vm_aws_az: eu-west-2a
-            cs_vm_flavour: t2.micro
-            cs_vm_aws_ami: ami-051fb39c3a16c8a85
-            cs_virtual_network_name: "{{ cornerstone_prefix }}vnet"
-            cs_virtual_network_cidr: "10.1.0.0/16"
-            cs_subnet_name: "{{ cornerstone_prefix }}subnet"
-            cs_public_private_ip: public
-            cs_vm_assign_public_ip: true
-            cs_publicip_allocation_method: Dynamic
-            cs_publicip_domain_name: null
-            cs_vm_data_disk: true
-            cs_vm_data_disk_device_name: "/dev/sdb"
-            cs_vm_data_disk_size: "15"
+            cornerstone_platform: aws
+            cornerstone_tag_purpose: "Openshift"
+            cornerstone_tag_role: "Master"
+            cornerstone_vm_name: aws-instance01
+            cornerstone_vm_state: present
+            cornerstone_location: eu-west-2
+            cornerstone_vm_aws_az: eu-west-2a
+            cornerstone_vm_flavour: t2.micro
+            cornerstone_vm_aws_ami: ami-051fb39c3a16c8a85
+            cornerstone_vm_aws_sg: "cs-sg"
+            cornerstone_virtual_network_name: "{{ cornerstone_prefix }}vnet"
+            cornerstone_virtual_network_cidr: "10.1.0.0/16"
+            cornerstone_subnet_name: "{{ cornerstone_prefix }}subnet"
+            cornerstone_public_private_ip: public
+            cornerstone_vm_assign_public_ip: true
+            cornerstone_vm_public_ip: 3.9.8.123
+            cornerstone_publicip_allocation_method: Dynamic
+            cornerstone_publicip_domain_name: null
+            cornerstone_vm_data_disk: true
+            cornerstone_vm_data_disk_device_name: "/dev/sdb"
+            cornerstone_vm_data_disk_size: "15"
           aws-instance02:
-            cs_platform: aws
-            cs_tag_purpose: "Openshift"
-            cs_tag_role: "Master"
-            cs_vm_name: aws-instance02
-            cs_vm_state: present
-            cs_location: eu-west-2
-            cs_vm_aws_az: eu-west-2b
-            cs_vm_flavour: t2.micro
-            cs_vm_aws_ami: ami-051fb39c3a16c8a85
-            cs_virtual_network_name: "{{ cornerstone_prefix }}vnet"
-            cs_virtual_network_cidr: "10.1.0.0/16"
-            cs_subnet_name: "{{ cornerstone_prefix }}subnet"
-            cs_public_private_ip: public
-            cs_vm_assign_public_ip: true
-            cs_publicip_allocation_method: Dynamic
-            cs_publicip_domain_name: null
-            cs_vm_data_disk: true
-            cs_vm_data_disk_device_name: "/dev/sdb"
-            cs_vm_data_disk_size: "15"
+            cornerstone_platform: aws
+            cornerstone_tag_purpose: "Openshift"
+            cornerstone_tag_role: "Master"
+            cornerstone_vm_name: aws-instance02
+            cornerstone_vm_state: present
+            cornerstone_location: eu-west-2
+            cornerstone_vm_aws_az: eu-west-2b
+            cornerstone_vm_flavour: t2.micro
+            cornerstone_vm_aws_ami: ami-051fb39c3a16c8a85
+            cornerstone_vm_aws_sg: "cs-sg"
+            cornerstone_virtual_network_name: "{{ cornerstone_prefix }}vnet"
+            cornerstone_virtual_network_cidr: "10.1.0.0/16"
+            cornerstone_subnet_name: "{{ cornerstone_prefix }}subnet"
+            cornerstone_public_private_ip: public
+            cornerstone_vm_assign_public_ip: true
+            cornerstone_vm_public_ip: 3.9.8.124
+            cornerstone_publicip_allocation_method: Dynamic
+            cornerstone_publicip_domain_name: null
+            cornerstone_vm_data_disk: true
+            cornerstone_vm_data_disk_device_name: "/dev/sdb"
+            cornerstone_vm_data_disk_size: "15"
 
       roles:
          - role: danhawker.cornerstone
@@ -229,3 +237,4 @@ Author Information
 ------------------
 
 Dan Hawker [Github](https://github.com/danhawker)
+Ken Hitchcock - Contributor

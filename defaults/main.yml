@@ -53,6 +53,11 @@ cornerstone_public_private_ip: public
 cornerstone_publicip_allocation_method: Dynamic
 cornerstone_publicip_domain_name: null
 
+
+# Setting default for security group
+cornerstone_vm_aws_sg: Default
+
+
 # Virtual Machine
 cornerstone_vm_flavour: Standard_D2s_v3
 # AWS AMI Image ID (latest RHEL 7.6)
