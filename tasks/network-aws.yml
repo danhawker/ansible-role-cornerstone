@@ -84,9 +84,13 @@
   ec2_group:
     name: "{{ item.name }}"
     description: "{{ item.description }}"
+    vpc_id: "{{ vpc.vpc.id }}"
     region: "{{ item.region }}"
+    profile: "{{ cornerstone_aws_profile }}"
     state: present
     rules: "{{ item.rules }}"
+    tags:
+      Project: "{{ cornerstone_prefix }}"
   with_items: "{{ from_template.cornerstone_sg }}"
 
   #- name: "[Cornerstone - AWS] Create Security Group"
