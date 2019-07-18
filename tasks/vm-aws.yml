@@ -159,4 +159,5 @@
         device_id: "{{ createdvm_data.instances[0].instance_id }}"
         state: present
   when:
-    - cornerstone_vm_public_ip is defined
+    - cornerstone_vm_public_ip is defined 
+    - cornerstone_vm_public_ip != ""
