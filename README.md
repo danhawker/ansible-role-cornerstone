@@ -159,9 +159,16 @@ Available variables are listed below, along with default values (see defaults/ma
     cornerstone_vm_libvirt_vmos: linux
 
     # VM resources to allocate
+    # Memory value MUST be in MB
     cornerstone_vm_libvirt_vmmem:
     cornerstone_vm_libvirt_vmcores:
 
+    # VM networking variables
+    cornerstone_vm_libvirt_ip:
+    cornerstone_vm_libvirt_subnet:
+    cornerstone_public_private_gateway:
+    cornerstone_public_private_dns1:
+    cornerstone_public_private_dns2:
 
 
 Dependencies
