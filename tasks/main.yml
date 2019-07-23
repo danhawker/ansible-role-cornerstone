@@ -8,7 +8,8 @@
 #
 - include: common-{{ cornerstone_platform }}.yml
   tags: [common, "{{ cornerstone_platform }}"]
-
+  when:
+    - cornerstone_platform != 'libvirt'
 
 #
 # -----------------------------------------------------------------------------
@@ -17,6 +18,8 @@
 #
 - include: network-{{ cornerstone_platform }}.yml
   tags: [network, "{{ cornerstone_platform }}"]
+  when:
+    - cornerstone_platform != 'libvirt'
 
 #
 # -----------------------------------------------------------------------------
@@ -51,6 +54,16 @@
     cornerstone_vm_data_disk_device_name: "{{ item.value.cornerstone_vm_data_disk_device_name }}"
     cornerstone_aws_vm_data_disk_managed: "{{ item.value.cornerstone_aws_vm_data_disk_managed }}"
     cornerstone_vm_data_disk_size: "{{ item.value.cornerstone_vm_data_disk_size }}"
+    # new libvirt variables to add
+# cornerstone_vm_location
+# cornerstone_working_dir
+# cornerstone_vm_libvirt_template
+# cornerstone_vm_libvirt_file_type
+# cornerstone_vm_libvirt_vmtype
+# cornerstone_vm_libvirt_vmos
+# cornerstone_vm_libvirt_vmmem
+# cornerstone_vm_libvirt_vmcores
+
   with_dict: "{{ guests }}"  
   tags: [vm, "{{ cornerstone_platform }}"]
 
@@ -87,5 +100,7 @@
     cornerstone_vm_data_disk_size: "{{ item.value.cornerstone_vm_data_disk_size }}"
   with_dict: "{{ guests }}"
   tags: ["{{ cornerstone_platform }}"]
+  when:
+    - cornerstone_platform != 'libvirt'
 
 # EOF

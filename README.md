@@ -16,7 +16,7 @@ Role Variables
 Available variables are listed below, along with default values (see defaults/main.yml):
 
     # Platform you wish to deploy a Cornerstone VM onto
-    # Currently supports aws, azure
+    # Currently supports aws, azure, libvirt
     cornerstone_platform: aws
 
     # Prefix - What prefix for objects to use. Eg myenv, myapp, etc
@@ -132,6 +132,37 @@ Available variables are listed below, along with default values (see defaults/ma
     ####################################################################
 
     cornerstone_vm_data_disk_size: 64
+
+    # Libvirt specific variables
+    
+    # Where are vms stored, default location is /var/lib/libvirt/images/
+    cornerstone_vm_location: /var/lib/libvirt/images/
+
+    # A working temp directory on the libvirt host where files can be created and deleted.
+    # Default value is /tmp
+    cornerstone_working_dir: /tmp/
+
+    # Name of the template to use to spin up linux vms.
+    # Default value is rhel7-image
+    cornerstone_vm_libvirt_template: rhel7-image
+
+    # Name of the vm file type that will be used.
+    # Default value is qcow2
+    cornerstone_vm_libvirt_file_type: qcow2
+
+    # The type of vm that will be created. Only supports "emptyvm" at this stage.
+    # Default value is no value
+    cornerstone_vm_libvirt_vmtype: 
+
+    # The operating system of the virtual machine
+    # Default value is linux, look at libvirt documentation for more values.
+    cornerstone_vm_libvirt_vmos: linux
+
+    # VM resources to allocate
+    cornerstone_vm_libvirt_vmmem:
+    cornerstone_vm_libvirt_vmcores:
+
+
 
 Dependencies
 ------------

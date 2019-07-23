@@ -1,0 +1,140 @@
+---
+#cornerstone_platform: "{{ item.value.cornerstone_platform }}"
+#    cornerstone_tag_purpose: "{{ item.value.cornerstone_tag_purpose }}"
+#    cornerstone_tag_role: "{{ item.value.cornerstone_tag_role }}"
+#    cornerstone_vm_name: "{{ item.value.cornerstone_vm_name }}"
+#    cornerstone_vm_state: "{{ item.value.cornerstone_vm_state }}"
+#    cornerstone_location: "{{ item.value.cornerstone_location }}"
+##    cornerstone_vm_aws_az: "{{ item.value.cornerstone_vm_aws_az }}"
+#    cornerstone_vm_flavour: "{{ item.value.cornerstone_vm_flavour }}"
+#    cornerstone_vm_aws_ami: "{{ item.value.cornerstone_vm_aws_ami }}"
+#    cornerstone_vm_aws_sg: "{{ item.value.cornerstone_vm_aws_sg }}"
+#    cornerstone_virtual_network_name: "{{ item.value.cornerstone_virtual_network_name }}"
+#    cornerstone_virtual_network_cidr: "{{ item.value.cornerstone_virtual_network_cidr }}"
+#    cornerstone_subnet_name: "{{ item.value.cornerstone_subnet_name }}"
+#    cornerstone_vm_assign_public_ip: "{{ item.value.cornerstone_vm_assign_public_ip }}"
+#    cornerstone_vm_public_ip: "{{ item.value.cornerstone_vm_public_ip }}"
+#    cornerstone_public_private_ip: "{{ item.value.cornerstone_public_private_ip }}"
+#    cornerstone_publicip_allocation_method: "{{ item.value.cornerstone_publicip_allocation_method }}"
+#    cornerstone_publicip_domain_name: "{{ item.value.cornerstone_publicip_domain_name }}"
+#    cornerstone_vm_os_disk_size: "{{ item.value.cornerstone_vm_os_disk_size }}"
+#    cornerstone_vm_data_disk: "{{ item.value.cornerstone_vm_data_disk }}"
+#    cornerstone_vm_data_disk_device_name: "{{ item.value.cornerstone_vm_data_disk_device_name }}"
+#    cornerstone_aws_vm_data_disk_managed: "{{ item.value.cornerstone_aws_vm_data_disk_managed }}"
+#    cornerstone_vm_data_disk_size: "{{ item.value.cornerstone_vm_data_disk_size }}"
+
+# new libvirt variables to add
+# cornerstone_vm_location
+# cornerstone_working_dir
+# cornerstone_vm_libvirt_template
+# cornerstone_vm_libvirt_file_type
+# cornerstone_vm_libvirt_vmtype
+# cornerstone_vm_libvirt_vmos
+# cornerstone_vm_libvirt_vmmem
+# cornerstone_vm_libvirt_vmcores
+
+- name: get VM disks
+  command: "ls {{ cornerstone_vm_location }}"
+  register: disks
+  changed_when: "disks.rc != 0"
+
+- name: Create working directories
+  file: path={{ cornerstone_working_dir }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} state=directory
+  when: cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout
+ 
+- name: Clone Image
+  command: >
+           virt-clone --connect qemu:///system --original {{ cornerstone_vm_libvirt_template }} 
+           --name {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} 
+           --file {{ cornerstone_vm_location }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.{{ cornerstone_vm_libvirt_file_type }} 
+  when: 
+    - cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout 
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+
+- name: Create Empty VM xml
+  shell: virt-install 
+           -n {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} 
+           --os-type=Linux 
+           --os-variant={{ cornerstone_vm_libvirt_vmos }} 
+           --ram={{ cornerstone_vm_libvirt_vmmem }} 
+           --vcpus={{ cornerstone_vm_libvirt_vmcores }} 
+           --disk path={{ cornerstone_vm_location }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.{{ cornerstone_vm_libvirt_file_type }},bus=virtio,size={{ cornerstone_vm_os_disk_size }}
+           --print-xml >{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}/{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.xml
+  when: 
+    - cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout 
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+
+- name: Define VM
+  virt:
+      name: "{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
+      command: define
+      xml: "{{ lookup('file', '{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}/{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.xml') }}"
+  when: 
+    - cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout 
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+
+- name: Set memory For VMs
+  shell: "virt-xml --memory {{ cornerstone_vm_libvirt_vmmem }} {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --edit"
+  when: 
+    - cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout 
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+ 
+- name: Set vCPUs For VMs
+  shell: "virt-xml --vcpu {{ cornerstone_vm_libvirt_vmcores }} {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --edit"
+  when: 
+    - cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout 
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+
+- name: Increase disk sizes
+  shell: "qemu-img resize {{ cornerstone_vm_location }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.{{ cornerstone_vm_libvirt_file_type }} +{{ cornerstone_vm_os_disk_size }}G"
+  when: 
+    - cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout 
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+
+- name: Create network configuration for each VM
+  shell: echo -e "BOOTPROTO=static
+         \nDEVICE=eth0
+         \nONBOOT=yes
+         \nTYPE=Ethernet
+         \nIPADDR={{ cornerstone_public_private_ip }}
+         \nPREFIX=24
+         \nGATEWAY={{ cornerstone_public_private_gateway }}
+         \nDNS1={{ cornerstone_public_private_dns1 }}
+         \nDNS2={{ cornerstone_public_private_dns2 }}
+         \nDOMAIN={{ cornerstone_public_private_domain_name }}" >>{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/ifcfg-eth0
+  when: 
+    - cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout 
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+
+- name: Create hostfile entry
+  shell: echo -e "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+         \n::1         localhost localhost.localdomain localhost6 localhost6.localdomain6 
+         \n{{ cornerstone_public_private_ip }}         {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} {{ cornerstone_vm_name }}
+         " >>{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}/hosts
+  when: 
+    - cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout 
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+
+- name: Set Hostname and Copy in network configuration
+  shell: "virt-customize --hostname {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}/ifcfg-eth0:/etc/sysconfig/network-scripts/ --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}/hosts:/etc/ --edit /etc/ssh/sshd_config:'s/^#UseDNS yes/UseDNS no/' -d {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
+  when: 
+    - cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout 
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+
+# Need to fix this inline with cornerstone process
+- name: Check if root ssh keys generated
+  stat: path=/root/.ssh/id_rsa.pub
+  register: root_ssh
+
+# Need to make sure the --selinux-relabel is inplace https://bugzilla.redhat.com/show_bug.cgi?id=1378311
+- name: Copy in ssh keys
+  shell: "virt-customize --ssh-inject root:file:/root/.ssh/id_rsa.pub --selinux-relabel -d {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
+  when: 
+    - cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout 
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+
+- name: Clean up working files
+  file: path={{ cornerstone_working_dir }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} state=absent
+  when: 
+    - cornerstone_vm_name.cornerstone_public_private_domain_name not in disks.stdout 
+
