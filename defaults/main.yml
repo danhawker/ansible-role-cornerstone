@@ -11,12 +11,14 @@ cornerstone_prefix: cornerstone
 # Cornerstone VM Name
 cornerstone_vm_name: "{{ cornerstone_prefix }}-vm"
 
+# Cornerstone VM state
+cornerstone_vm_state: present
+
 # SSH Credentials
 cornerstone_ssh_admin_username: rhadmin
 cornerstone_ssh_admin_pubkey: ""
 #cornerstone_ssh_admin_privkey_path: "/home/{{ cornerstone_ssh_admin_username }}/.ssh/id_rsa"
 cornerstone_ssh_extra_args: "-o StrictHostKeyChecking=no"
-
 
 # The AWS SSH Key to use. Must be pre-created in AWS
 cornerstone_aws_ssh_key_name: mykey
@@ -24,7 +26,6 @@ cornerstone_aws_ssh_key_name: mykey
 # API Credentials
 # What Boto profile to use for AWS
 cornerstone_aws_profile: myprofile
-
 
 # Platform Location/Region
 # Which location/region do you wish to use?
@@ -53,10 +54,8 @@ cornerstone_public_private_ip: public
 cornerstone_publicip_allocation_method: Dynamic
 cornerstone_publicip_domain_name: null
 
-
 # Setting default for security group
 cornerstone_vm_aws_sg: Default
-
 
 # Virtual Machine
 cornerstone_vm_flavour: Standard_D2s_v3
@@ -82,11 +81,13 @@ cornerstone_vm_libvirt_vmcores: 1
 # Disks
 # Type of managed disk (AWS)
 cornerstone_aws_vm_disk_managed: gp2
+
 # Type of managed disk (Azure)
 cornerstone_azure_vm_disk_managed: Standard_LRS
+
 # Base OS Disk Size (Standard AWS base is 10GB, Azure is 32GB)
-# FIXME: only works for Azure hosts currently
 cornerstone_vm_os_disk_size: 20
+
 # Do we want a separate data disk?
 cornerstone_vm_data_disk: false
 cornerstone_vm_data_disk_size: 64

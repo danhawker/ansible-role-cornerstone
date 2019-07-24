@@ -1,5 +1,39 @@
 ---
 
+- name: "Status of VM on Libvirt host"
+  virt:
+    name: '{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}' 
+    command: status
+  register: vm_status
+  when:
+    - cornerstone_vm_state == 'absent'
+
+      #- name: "debugging"
+      #  debug:
+      #    msg: "{{ vm_status.status }}"
+
+- name: "Stop VM on Libvirt host"
+  virt:
+    name: '{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}' 
+    command: destroy
+  when:
+    - cornerstone_vm_state == 'absent'
+    - vm_status.status != 'shutdown'
+
+- name: "Undefine VM from Libvirt host"
+  virt:
+    name: '{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}' 
+    command: undefine
+  when:
+    - cornerstone_vm_state == 'absent'
+
+- name: "Remove VM files"
+  file:
+    path: '{{ cornerstone_vm_location }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.{{ cornerstone_vm_libvirt_file_type }}'
+    state: absent
+  when:
+    - cornerstone_vm_state == 'absent'
+
 - name: get VM disks
   command: "ls {{ cornerstone_vm_location }}"
   register: disks
@@ -18,6 +52,7 @@
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype != "emptyvm"
+    - cornerstone_vm_state == 'present'
 
 - name: Create Empty VM xml
   shell: virt-install 
@@ -31,6 +66,7 @@
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype == "emptyvm"
+    - cornerstone_vm_state == 'present'
 
 - name: Define VM
   virt:
@@ -40,24 +76,28 @@
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype == "emptyvm"
+    - cornerstone_vm_state == 'present'
 
 - name: Set memory For VMs
   shell: "virt-xml --memory {{ cornerstone_vm_libvirt_vmmem }} {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --edit"
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype != "emptyvm"
- 
+    - cornerstone_vm_state == 'present'
+
 - name: Set vCPUs For VMs
   shell: "virt-xml --vcpu {{ cornerstone_vm_libvirt_vmcores }} {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --edit"
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype != "emptyvm"
+    - cornerstone_vm_state == 'present'
 
 - name: Increase disk sizes
   shell: "qemu-img resize {{ cornerstone_vm_location }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.{{ cornerstone_vm_libvirt_file_type }} +{{ cornerstone_vm_os_disk_size }}G"
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype != "emptyvm"
+    - cornerstone_vm_state == 'present'
 
 - name: Create network configuration for each VM
   shell: echo -e "BOOTPROTO=static
@@ -73,6 +113,7 @@
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype != "emptyvm"
+    - cornerstone_vm_state == 'present'
 
 - name: Create hostfile entry
   shell: echo -e "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
@@ -82,12 +123,14 @@
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype != "emptyvm"
+    - cornerstone_vm_state == 'present'
 
 - name: Set Hostname and Copy in network configuration
   shell: "virt-customize --hostname {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/ifcfg-eth0:/etc/sysconfig/network-scripts/ --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/hosts:/etc/ --edit /etc/ssh/sshd_config:'s/^#UseDNS yes/UseDNS no/' -d {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype != "emptyvm"
+    - cornerstone_vm_state == 'present'
 
 # Need to fix this inline with cornerstone process
 - name: Check if root ssh keys generated
@@ -100,9 +143,17 @@
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype != "emptyvm"
+    - cornerstone_vm_state == 'present'
 
 - name: Clean up working files
   file: path={{ cornerstone_working_dir }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} state=absent
   when: 
     - cornerstone_vm_name not in disks.stdout 
+
+- name: "Start VM on Libvirt host"
+  virt:
+    name: '{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}'
+    state: running
+  when:
+    - cornerstone_vm_state == 'present'
 

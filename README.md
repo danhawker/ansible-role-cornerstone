@@ -29,6 +29,12 @@ Available variables are listed below, along with default values (see defaults/ma
     # Cornerstone VM Name
     cornerstone_vm_name: "{{ cornerstone_prefix }}-vm"
 
+    # Determines if a vm should be added or removed. 
+    # This works for AWS and libvirt but not Azure yet.
+    # Accepted values are present and absent only.
+    # Default value is present
+    cornerstone_vm_state: present
+
     # SSH Credentials
     cornerstone_ssh_admin_username: rhadmin
     cornerstone_ssh_admin_pubkey: <add_your_ssh_public_key_data>
