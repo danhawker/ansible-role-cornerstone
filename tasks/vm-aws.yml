@@ -161,3 +161,4 @@
   when:
     - cornerstone_vm_public_ip is defined 
     - cornerstone_vm_public_ip != ""
+    - cornerstone_vm_state == present
