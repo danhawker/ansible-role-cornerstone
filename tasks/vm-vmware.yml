@@ -1,0 +1,40 @@
+---
+
+- name: "Create VMWare Guest {{ cornerstone_hostname }}"
+  vmware_guest:
+    hostname: "{{ cornerstone_vcenter_hostname }}"
+    username: "{{ cornerstone_vcenter_username }}"
+    password: "{{ cornerstone_vcenter_password }}"
+    validate_certs: no
+    folder: "{{ cornerstone_vmware_destination }}"
+    name: "{{ cornerstone_computer_name }}"
+    state: "{{ cornerstone_machine_state }}"
+    template: "{{ cornerstone_vmware_template }}"
+    disk:
+    - size_gb: "{{ cornerstone_disk_size }}"
+      type: "{{ cornerstone_disk)type }}"
+      datastore: "{{ cornerstone_datastore }}"
+    hardware:
+      memory_mb: "{{ cornerstone_memory }}"
+      num_cpus: "{{ cornerstone_cpu_count }}"
+      num_cpu_cores_per_socket: "{{ cornerstone_socket_cores }}"
+      scsi: "{{ cornerstone_scsi_type }}"
+      memory_reservation_lock: "{{ cornerstone_memory_lock }}"
+      mem_limit: "{{ cornerstone_memory_limit }}"
+      mem_reservation: "{{ cornerstone_memory_res }}"
+      cpu_limit: "{{ cornerstone_cpu_limit }}"
+      cpu_reservation: "{{ cornerstone_cpu_reservation }}"
+      max_connections: "{{ cornerstone_max_connection }}"
+      hotadd_cpu: "{{ corerstone_hotadd_cpu }}"
+      hotremove_cpu: "{{ cornerstone_hotremove_cpu }}"
+      hotadd_memory: "{{ cornerstone_hotadd_memory }}"
+      version: "{{ cornerstone_hardware_version }}" # Hardware version of virtual machine
+      boot_firmware: "efi"
+    cdrom:
+      type: iso
+      iso_path: "{{ cornerstone_iso_datastore}} {{ cornerstone_iso_name }}"
+    networks:
+    - name: "{{ cornerstone_network_name }}"
+      mac: "{{ cornerstone_nic_mac }}"
+    wait_for_ip_address: 'yes'
+  when: "{{ cornerstone_use_template }}" is true
