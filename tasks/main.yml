@@ -2,9 +2,9 @@
 # tasks file for cornerstone
 
 #
-# -----------------------------------------------------------------------------
+# =============================================================================
 # Common Tasks
-# -----------------------------------------------------------------------------
+# =============================================================================
 #
 - include: common-{{ cornerstone_platform }}.yml
   tags: [common, "{{ cornerstone_platform }}"]
@@ -12,9 +12,9 @@
     - cornerstone_platform != 'libvirt'
 
 #
-# -----------------------------------------------------------------------------
+# =============================================================================
 # Network Tasks
-# -----------------------------------------------------------------------------
+# =============================================================================
 #
 - include: network-{{ cornerstone_platform }}.yml
   tags: [network, "{{ cornerstone_platform }}"]
@@ -22,11 +22,16 @@
     - cornerstone_platform != 'libvirt'
 
 #
-# -----------------------------------------------------------------------------
+# =============================================================================
 # Virtual Machine Tasks
-# -----------------------------------------------------------------------------
+# =============================================================================
 #
 #  include: "vm-{{ item.value.cornerstone_platform }}.yml"
+
+  # ============================== #
+  #   CURRENT SUPPORT PLATFORMS:   #
+  #  AWS, AZURE, LIBVIRT & VMWARE  #
+  # ============================== #
 
 - name: Build vms based on dict
   include_tasks: "vm-{{ item.value.cornerstone_platform }}.yml"
@@ -71,14 +76,13 @@
 
   # ========================================================================== #
   #  BELOW IS THE VMWARE HOST DEFINITION ITEMS USED FOR MAKING A VMWARE GUEST  #
+  #    SOME DEFINITIONS FROM ABOVE ARE ALSO USED LIKE PLATFORM, STATE, ETC
   # ========================================================================== #
 
     cornerstone_vmware_hostname: "{{ item.value.cornerstone_vmware_hostname }}"
     cornerstone_vmware_username: "{{ item.value.cornerstone_vmware_username }}"
     cornerstone_vmware_password: "{{ item.value.cornerstone_vmware_password }}"
     cornerstone_vmware_destination: "{{ item.value.cornerstone_vmware_destination }}"
-    cornerstone_vm_name: "{{ item.value.cornerstone_vm_name }}"
-    cornerstone_vm_state: "{{ item.value.cornerstone_vm_state }}"
     cornerstone_vmware_template: "{{ item.value.cornerstone_vmware_template }}"
     cornerstone_vmware_disk_size: "{{ item.value.cornerstone_vm_os_disk_size }}"
     cornerstone_vmware_disk_type: "{{ item.value.cornerstone_vmware_disk_type }}"
@@ -106,12 +110,10 @@
   with_dict: "{{ guests }}"  
   tags: [vm, "{{ cornerstone_platform }}"]
 
-
-#
-# -----------------------------------------------------------------------------
+# =============================================================================
 # Discover IP Address Tasks
-# -----------------------------------------------------------------------------
-#
+# =============================================================================
+
 - name: Discover IP address tasks
   include: discover-ip-{{ cornerstone_platform }}.yml
   vars:
