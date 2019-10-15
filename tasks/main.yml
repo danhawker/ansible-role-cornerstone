@@ -105,9 +105,6 @@
     cornerstone_vmware_iso_name: "{{ item.value.cornerstone_vmware_iso_name }}"
     cornerstone_vmware_network_name: "{{ item.value.cornerstone_vmware_network_name }}"
     cornerstone_vmware_nic_mac: "{{ item.value.cornerstone_vmware_nic_mac }}"
-
-
-  with_dict: "{{ guests }}"  
   loop: "{{ guests|dict2items }}"  
   tags: [vm, "{{ cornerstone_platform }}"]
 
