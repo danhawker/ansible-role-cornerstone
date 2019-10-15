@@ -90,6 +90,7 @@
           volume_size: "{{ cornerstone_vm_os_disk_size }}"
     network:
       assign_public_ip: "{{ cornerstone_vm_assign_public_ip }}" 
+      private_ip_address: "{{ cornerstone_vm_private_ip }}"
     profile: "{{ cornerstone_aws_profile }}"
     tags:
       Project: "{{ cornerstone_prefix }}"
@@ -123,6 +124,7 @@
     image_id: "{{ cornerstone_vm_aws_ami }}"
     network:
       assign_public_ip: "{{ cornerstone_vm_assign_public_ip }}" 
+      private_ip_address: "{{ cornerstone_vm_private_ip }}"
     profile: "{{ cornerstone_aws_profile }}"
     volumes:
       - device_name: /dev/sda1
@@ -161,4 +163,4 @@
   when:
     - cornerstone_vm_public_ip is defined 
     - cornerstone_vm_public_ip != ""
-    - cornerstone_vm_state == present
+    - cornerstone_vm_state == "present"

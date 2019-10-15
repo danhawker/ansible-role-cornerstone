@@ -1,0 +1,10 @@
+{
+  "cs_vmvar": [
+    {% for cornerstone_vmvar in to_cornerstone_template_aws_vmvars %}
+    {
+      "{{ vmvar.varname }}": "{{ vmvar.varvalue }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+
