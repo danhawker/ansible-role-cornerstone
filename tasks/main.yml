@@ -25,7 +25,6 @@
 # -----------------------------------------------------------------------------
 # Virtual Machine Tasks
 # -----------------------------------------------------------------------------
-#
 #  include: "vm-{{ item.value.cornerstone_platform }}.yml"
 
 - name: Build vms based on dict
@@ -43,6 +42,7 @@
     cornerstone_vm_aws_sg: "{{ item.value.cornerstone_vm_aws_sg }}"
     cornerstone_virtual_network_name: "{{ item.value.cornerstone_virtual_network_name }}"
     cornerstone_virtual_network_cidr: "{{ item.value.cornerstone_virtual_network_cidr }}"
+    cornerstone_vm_private_ip: "{{ item.value.cornerstone_vm_private_ip }}"
     cornerstone_subnet_name: "{{ item.value.cornerstone_subnet_name }}"
     cornerstone_vm_assign_public_ip: "{{ item.value.cornerstone_vm_assign_public_ip }}"
     cornerstone_vm_public_ip: "{{ item.value.cornerstone_vm_public_ip }}"
@@ -69,7 +69,7 @@
     cornerstone_vm_dns2: "{{ item.value.cornerstone_vm_dns2 }}"
     cornerstone_vm_ip: "{{ item.value.cornerstone_vm_ip }}"
 
-  with_dict: "{{ guests }}"  
+  loop: "{{ guests|dict2items }}"  
   tags: [vm, "{{ cornerstone_platform }}"]
 
 
@@ -116,8 +116,15 @@
     cornerstone_vm_dns1: "{{ item.value.cornerstone_vm_dns1 }}"
     cornerstone_vm_dns2: "{{ item.value.cornerstone_vm_dns2 }}"
     cornerstone_vm_ip: "{{ item.value.cornerstone_vm_ip }}"
-
-  with_dict: "{{ guests }}"
+    #    cornerstone_ssh_vars: "{{ item.value.cornerstone_ssh_vars }}"
+  loop: "{{ guests|dict2items }}"
   tags: ["{{ cornerstone_platform }}"]
+
+  #cornerstone_ssh_vars:
+  #      - { varname: "{{ item[1].varname }}", varvalue: "{{ item[1].varvalue }}" }
+  #  with_subelements:
+  #  - "{{ guests }}"
+  #  - cornerstone_ssh_vars
+
 
 # EOF
