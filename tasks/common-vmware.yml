@@ -1,0 +1,25 @@
+---
+
+- name: Ensure desired datacenters exist as required.
+  local_action:
+    module: vmware_datacenter
+    hostname: "{{ cornerstone_vmware_hostname }}"
+    username: "{{ cornerstone_vmware_username }}"
+    password: "{{ cornerstone_vmware_password }}"
+    datacenter_name: "{{ item.vmware_name }}"
+    state: "{{ item.vmware_state }}"
+  with_items: "{{ from_template.cornerstone_vmware_datacenter }}"
+
+- name: Ensure desired clusters exist as desired.
+  local_action:
+    module: vmware_cluster
+    hostname: "{{ cornerstone_vmware_hostname }}"
+    username: "{{ cornerstone_vmware_username }}"
+    password: "{{ cornerstone_vmware_password }}"
+    datacenter_name: "{{ item.vmware_datacenter }}"
+    cluster_name: "{{ item.vmware_name }}"
+    enable_ha:  "{{ item.vmware_ha_bool }}"
+    enable_drs: "{{ item.vmware_drs_bool }}"
+    enable_vsan: "{{ item.vmware_vsan_bool }}"
+    state:  "{{ item.vmware_state }}"
+  with_items: "{{ from_template.cornerstone_vmware_cluster }}"

@@ -2,9 +2,9 @@
 # tasks file for cornerstone
 
 #
-# -----------------------------------------------------------------------------
+# =============================================================================
 # Common Tasks
-# -----------------------------------------------------------------------------
+# =============================================================================
 #
 - include: common-{{ cornerstone_platform }}.yml
   tags: [common, "{{ cornerstone_platform }}"]
@@ -12,9 +12,9 @@
     - cornerstone_platform != 'libvirt'
 
 #
-# -----------------------------------------------------------------------------
+# =============================================================================
 # Network Tasks
-# -----------------------------------------------------------------------------
+# =============================================================================
 #
 - include: network-{{ cornerstone_platform }}.yml
   tags: [network, "{{ cornerstone_platform }}"]
@@ -22,11 +22,17 @@
     - cornerstone_platform != 'libvirt'
 
 #
-# -----------------------------------------------------------------------------
+# =============================================================================
 # Virtual Machine Tasks
-# -----------------------------------------------------------------------------
-#
+# feature/adding_vmware_capabilities
+# =============================================================================
+
 #  include: "vm-{{ item.value.cornerstone_platform }}.yml"
+
+  # ============================== #
+  #   CURRENT SUPPORT PLATFORMS:   #
+  #  AWS, AZURE, LIBVIRT & VMWARE  #
+  # ============================== #
 
 - name: Build vms based on dict
   include_tasks: "vm-{{ item.value.cornerstone_platform }}.yml"
@@ -43,6 +49,7 @@
     cornerstone_vm_aws_sg: "{{ item.value.cornerstone_vm_aws_sg }}"
     cornerstone_virtual_network_name: "{{ item.value.cornerstone_virtual_network_name }}"
     cornerstone_virtual_network_cidr: "{{ item.value.cornerstone_virtual_network_cidr }}"
+    cornerstone_vm_private_ip: "{{ item.value.cornerstone_vm_private_ip }}"
     cornerstone_subnet_name: "{{ item.value.cornerstone_subnet_name }}"
     cornerstone_vm_assign_public_ip: "{{ item.value.cornerstone_vm_assign_public_ip }}"
     cornerstone_vm_public_ip: "{{ item.value.cornerstone_vm_public_ip }}"
@@ -68,16 +75,43 @@
     cornerstone_vm_dns1: "{{ item.value.cornerstone_vm_dns1 }}"
     cornerstone_vm_dns2: "{{ item.value.cornerstone_vm_dns2 }}"
     cornerstone_vm_ip: "{{ item.value.cornerstone_vm_ip }}"
-
-  with_dict: "{{ guests }}"  
+  # ========================================================================== #
+  #  BELOW IS THE VMWARE HOST DEFINITION ITEMS USED FOR MAKING A VMWARE GUEST  #
+  #    SOME DEFINITIONS FROM ABOVE ARE ALSO USED LIKE PLATFORM, STATE, ETC
+  # ========================================================================== #
+    cornerstone_vmware_hostname: "{{ item.value.cornerstone_vmware_hostname }}"
+    cornerstone_vmware_username: "{{ item.value.cornerstone_vmware_username }}"
+    cornerstone_vmware_password: "{{ item.value.cornerstone_vmware_password }}"
+    cornerstone_vmware_destination: "{{ item.value.cornerstone_vmware_destination }}"
+    cornerstone_vmware_template: "{{ item.value.cornerstone_vmware_template }}"
+    cornerstone_vmware_disk_size: "{{ item.value.cornerstone_vm_os_disk_size }}"
+    cornerstone_vmware_disk_type: "{{ item.value.cornerstone_vmware_disk_type }}"
+    cornerstone_vmware_datastore: "{{ item.value.cornerstone_vmware_datastore }}"
+    cornerstone_vmware_memory: "{{ item.value.cornerstone_vmware_memory }}"
+    cornerstone_vmware_cpu_count: "{{ item.value.cornerstone_vmware_cpu_count }}"
+    cornerstone_vmware_socket_cores: "{{ item.value.cornerstone_vmware_socket_cores }}"
+    cornerstone_vmware_scsi_type: "{{ item.value.cornerstone_vmware_scsi_type }}"
+    cornerstone_vmware_memory_lock: "{{ item.value.cornerstone_vmware_memory_lock }}"
+    cornerstone_vmware_memory_limit: "{{ item.value.cornerstone_vmware_memory_limit }}"
+    cornerstone_vmware_memory_reservation: "{{ item.value.cornerstone_vmware_memory_reservation }}"
+    cornerstone_vmware_cpu_limit: "{{ item.value.cornerstone_vmware_cpu_limit }}"
+    cornerstone_vmware_cpu_reservation: "{{ item.value.cornerstone_vmware_cpu_reservation }}"
+    cornerstone_vmware_max_connection: "{{ item.value.cornerstone_vmware_max_connection }}"
+    cornerstone_vmware_hotadd_cpu: "{{ item.value.cornerstone_vmware_hotadd_cpu }}"
+    cornerstone_vmware_hotremove_cpu: "{{ item.value.cornerstone_vmware_hotremove_cpu }}"
+    cornerstone_vmware_hotadd_memory: "{{ item.value.cornerstone_vmware_hotadd_memory }}"
+    cornerstone_vmware_hardware_version: "{{ item.value.cornerstone_vmware_hardware_version }}"
+    cornerstone_vmware_iso_datastore: "{{ item.value.cornerstone_vmware_iso_datastore }}"
+    cornerstone_vmware_iso_name: "{{ item.value.cornerstone_vmware_iso_name }}"
+    cornerstone_vmware_network_name: "{{ item.value.cornerstone_vmware_network_name }}"
+    cornerstone_vmware_nic_mac: "{{ item.value.cornerstone_vmware_nic_mac }}"
+  loop: "{{ guests|dict2items }}"  
   tags: [vm, "{{ cornerstone_platform }}"]
 
-
-#
-# -----------------------------------------------------------------------------
+# =============================================================================
 # Discover IP Address Tasks
-# -----------------------------------------------------------------------------
-#
+# =============================================================================
+
 - name: Discover IP address tasks
   include: discover-ip-{{ cornerstone_platform }}.yml
   vars:
@@ -116,8 +150,15 @@
     cornerstone_vm_dns1: "{{ item.value.cornerstone_vm_dns1 }}"
     cornerstone_vm_dns2: "{{ item.value.cornerstone_vm_dns2 }}"
     cornerstone_vm_ip: "{{ item.value.cornerstone_vm_ip }}"
-
-  with_dict: "{{ guests }}"
+    #    cornerstone_ssh_vars: "{{ item.value.cornerstone_ssh_vars }}"
+  loop: "{{ guests|dict2items }}"
   tags: ["{{ cornerstone_platform }}"]
+
+  #cornerstone_ssh_vars:
+  #      - { varname: "{{ item[1].varname }}", varvalue: "{{ item[1].varvalue }}" }
+  #  with_subelements:
+  #  - "{{ guests }}"
+  #  - cornerstone_ssh_vars
+
 
 # EOF

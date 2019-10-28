@@ -62,7 +62,7 @@
            --ram={{ cornerstone_vm_libvirt_vmmem }} 
            --vcpus={{ cornerstone_vm_libvirt_vmcores }} 
            --disk path={{ cornerstone_vm_location }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.{{ cornerstone_vm_libvirt_file_type }},bus=virtio,size={{ cornerstone_vm_os_disk_size }}
-           --print-xml >{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}/{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.xml
+           --print-xml >{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.xml
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype == "emptyvm"
@@ -72,7 +72,7 @@
   virt:
       name: "{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
       command: define
-      xml: "{{ lookup('file', '{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}/{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.xml') }}"
+      xml: "{{ lookup('file', '{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.xml') }}"
   when: 
     - cornerstone_vm_name not in disks.stdout 
     - cornerstone_vm_libvirt_vmtype == "emptyvm"
@@ -156,4 +156,5 @@
     state: running
   when:
     - cornerstone_vm_state == 'present'
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
 
