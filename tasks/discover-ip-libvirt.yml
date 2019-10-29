@@ -7,6 +7,10 @@
 # -----------------------------------------------------------------------------
 #
 
+- name: "Debugging"
+  debug:
+    msg: "{{ cornerstone_vm_ip }}"
+
 - name: "[Cornerstone - VM] Register IP with Temporary Host Group"
   add_host:
     hostname: "{{ cornerstone_vm_ip }}"
