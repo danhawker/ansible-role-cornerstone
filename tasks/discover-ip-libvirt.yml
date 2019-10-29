@@ -14,6 +14,8 @@
     ansible_ssh_user: "{{ cornerstone_ssh_user }}"
     ansible_ssh_private_key_file: "{{ cornerstone_ssh_key_path }}"
     ansible_ssh_extra_args: '-o StrictHostKeyChecking=no'
+  when: 
+    - cornerstone_vm_ip != "127.0.0.1"
 
 - name: "[Cornerstone - VM] Register IP with Temporary Host Group named after the Purpose tag"
   add_host:
@@ -24,6 +26,7 @@
     ansible_ssh_extra_args: "{{ cornerstone_ssh_extra_args }}"
   when:   
     - cornerstone_tag_purpose != ""
+    - cornerstone_vm_ip != "127.0.0.1"
 
 - name: "[Cornerstone - VM] Register IP with Temporary Host Group named after the Role tag"
   add_host:
@@ -34,3 +37,4 @@
     ansible_ssh_extra_args: "{{ cornerstone_ssh_extra_args }}"
   when:
     - cornerstone_tag_role != ""
+    - cornerstone_vm_ip != "127.0.0.1"
