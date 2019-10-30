@@ -34,6 +34,15 @@
   when:
     - cornerstone_vm_state == 'absent'
 
+- name: "Remove VM data disk"
+  file:
+    path: '{{ cornerstone_vm_location }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}-datadisk.{{ cornerstone_vm_libvirt_file_type }}'
+    state: absent
+  when:
+    - cornerstone_vm_state == 'absent'
+    - cornerstone_vm_data_disk == true
+
+
 - name: get VM disks
   command: "ls {{ cornerstone_vm_location }}"
   register: disks
@@ -99,6 +108,15 @@
     - cornerstone_vm_libvirt_vmtype != "emptyvm"
     - cornerstone_vm_state == 'present'
 
+- name: "Create additional data disk."
+  shell: "qemu-img create -f {{ cornerstone_vm_libvirt_file_type }} {{ cornerstone_vm_location }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}-datadisk.{{ cornerstone_vm_libvirt_file_type }} {{ cornerstone_vm_data_disk_size }}G"
+  when:
+    - cornerstone_vm_data_disk == true 
+    - cornerstone_vm_data_disk_size is defined
+    - cornerstone_vm_name not in disks.stdout
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+    - cornerstone_vm_state == 'present'
+
 - name: Create network configuration for each VM
   shell: echo -e "BOOTPROTO=static
          \nDEVICE=eth0
@@ -157,4 +175,13 @@
   when:
     - cornerstone_vm_state == 'present'
     - cornerstone_vm_libvirt_vmtype != "emptyvm"
+
+- name: "Attach additional data disk to VM."
+  shell: "virsh attach-disk {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} {{ cornerstone_vm_location }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}-datadisk.{{ cornerstone_vm_libvirt_file_type }} {{ cornerstone_vm_data_disk_dev | default('vdb') }} --cache none"
+  when:
+    - cornerstone_vm_data_disk == true
+    - cornerstone_vm_data_disk_size is defined
+    - cornerstone_vm_name not in disks.stdout
+    - cornerstone_vm_libvirt_vmtype != "emptyvm"
+    - cornerstone_vm_state == 'present'
 

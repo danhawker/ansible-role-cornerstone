@@ -139,6 +139,9 @@ Available variables are listed below, along with default values (see defaults/ma
 
     cornerstone_vm_data_disk_size: 64
 
+    # The device name you want the disk to use when attached to a libvirt vm
+    cornerstone_vm_data_disk_dev: vdb
+
     # Libvirt specific variables
     
     # Where are vms stored, default location is /var/lib/libvirt/images/
