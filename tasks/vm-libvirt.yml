@@ -51,7 +51,7 @@
   changed_when: "disks.rc != 0"
 
 - name: "Create working directories"
-  file: path={{ cornerstone_workings_dir }}{{ cornerstone_vm_name }} state=directory
+  file: path={{ cornerstone_working_dir }}{{ cornerstone_vm_name }} state=directory
   when: 
     - cornerstone_vm_name not in disks.stdout
  
