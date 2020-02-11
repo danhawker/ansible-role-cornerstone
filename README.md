@@ -73,6 +73,10 @@ Available variables are listed below, along with default values (see defaults/ma
       - "10.1.16.0/20"
       - "10.1.32.0/20"
 
+    # Currently only with Libvirt can you add additional network interfaces.
+    cornerstone_vm_extra_nics: 1  # Supports any numeric number for the amount of nics you wish to add. These are additional nics. So currently nic + value here.
+    cornerstone_vm_netname: default # In libvirt this is the name of the network you wish the nic to be part of. "virsh net-list" will show the networks.
+
     # Private or Public IP
     cornerstone_vm_assign_public_ip: true
     cornerstone_vm_public_ip: <elastic ip precreated>

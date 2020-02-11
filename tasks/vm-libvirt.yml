@@ -214,10 +214,38 @@
     - cornerstone_vm_libvirt_vmtype != "emptyvm"
     - cornerstone_vm_state == 'present'
 
-- name: "Attach addidtional nics if required."
-  shell:
-    cmd: "virsh attach-interface --domain  {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --type network \
-        --source {{ cornerstone_vm_netname }} --model virtio --persistent --config --live"
-  ignore_errors: true
-  when: 
-    - cornerstone_vm_extra_nics is defined
+- name: "Set facts for chceking how many nics to add"
+  set_fact:
+    vm_extra_nics: "{{cornerstone_vm_extra_nics}}"
+
+- name: "Add additional nics"
+  block:
+    - name: "Check if the correct number of nics have already been added."
+      shell:
+        cmd: 'virsh dumpxml basicvm.kenlab.local | grep "mac address" | wc -l'
+      ignore_errors: yes
+      register: vm_nic_num
+    
+    - name: "Work out the expected nics"
+      set_fact:
+        expected_nics: "{{cornerstone_vm_extra_nics|int +1}}"
+        required_nics: "{{cornerstone_vm_extra_nics|int +1 - vm_nic_num|int }}"
+        dom_name: "{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
+        net_source: "{{ cornerstone_vm_netname }}"
+    
+    - name: "debugging"
+      debug:
+        msg: "number of current nics = {{vm_nic_num.stdout}}, number of required nics is {{cornerstone_vm_extra_nics|int +1}}. Number of nics to add {{required_nics}}"
+    
+    - name: "Attach addidtional nics if required."
+      shell:
+        cmd: "virsh attach-interface --domain {{dom_name}} --type network \
+            --source {{net_source}} --model virtio --persistent --config --live"
+      ignore_errors: true
+      loop: "{{ query('sequence', 'start=1 end='+(required_nics|string)) }}"
+      when:     
+        - vm_nic_num.stdout is defined
+        - vm_nic_num.stdout|int < expected_nics|int
+  when:
+    - vm_extra_nics is defined
+    - vm_extra_nics|int > 0
