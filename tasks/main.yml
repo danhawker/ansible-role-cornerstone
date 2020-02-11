@@ -75,6 +75,8 @@
     cornerstone_vm_dns1: "{{ item.value.cornerstone_vm_dns1 }}"
     cornerstone_vm_dns2: "{{ item.value.cornerstone_vm_dns2 }}"
     cornerstone_vm_ip: "{{ item.value.cornerstone_vm_ip }}"
+    cornerstone_vm_extra_nics: "{{item.value.cornerstone_vm_extra_nics}}"
+    cornerstone_vm_netname: "{{item.value.cornerstone_vm_netname}}"
   # ========================================================================== #
   #  BELOW IS THE VMWARE HOST DEFINITION ITEMS USED FOR MAKING A VMWARE GUEST  #
   #    SOME DEFINITIONS FROM ABOVE ARE ALSO USED LIKE PLATFORM, STATE, ETC

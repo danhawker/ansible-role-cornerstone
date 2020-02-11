@@ -73,6 +73,12 @@
   when: not vm_data.instances 
 
 # Create the VM (baseline no data disks)
+- set_fact:
+    from_template: "{{ lookup('template', '../templates/aws_tags_template.j2') }}"
+  vars:
+    to_cornerstone_template_aws_sg: "{{ cornerstone_sg }}"
+#    to_cornerstone_template_aws_sg: "{{ cornerstone_sg }}"
+
 - name: "[Cornerstone - AWS] Create/Delete VM - {{ cornerstone_vm_name }}"
   ec2_instance:
     name: "{{ cornerstone_vm_name }}"
@@ -96,6 +102,7 @@
       Project: "{{ cornerstone_prefix }}"
       Purpose: "{{ cornerstone_tag_purpose }}"
       Role: "{{ cornerstone_tag_role }}"
+      kubernetes.io/cluster/openshift: "clusterid"
   when: not cornerstone_vm_data_disk
   register: output_vm_"{{ cornerstone_vm_name }}"
 
@@ -138,6 +145,7 @@
       Project: "{{ cornerstone_prefix }}"
       Purpose: "{{ cornerstone_tag_purpose }}"
       Role: "{{ cornerstone_tag_role }}"
+      kubernetes.io/cluster/openshift: "clusterid"
   when: cornerstone_vm_data_disk
   register: output_vm_"{{ cornerstone_vm_name }}"
 
