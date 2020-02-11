@@ -218,8 +218,6 @@
   shell:
     cmd: "virsh attach-interface --domain  {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --type network \
         --source {{ cornerstone_vm_netname }} --model virtio --persistent --config --live"
-  args:
-    chdir: "{{QUAY_WORKING_PATH}}"
   ignore_errors: true
   when: 
     - cornerstone_vm_extra_nics is defined
