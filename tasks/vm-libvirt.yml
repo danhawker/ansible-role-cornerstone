@@ -224,7 +224,7 @@
   block:
     - name: "Check if the correct number of nics have already been added."
       shell:
-        cmd: 'virsh dumpxml basicvm.kenlab.local | grep "mac address" | wc -l'
+        cmd: 'virsh dumpxml basicvm.kenlab.local | grep "<mac" | wc -l'
       ignore_errors: yes
       register: vm_nic_num
     
