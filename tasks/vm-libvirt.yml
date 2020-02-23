@@ -224,7 +224,7 @@
   block:
     - name: "Check if the correct number of nics have already been added."
       shell:
-        cmd: 'virsh dumpxml basicvm.kenlab.local | grep "<mac" | wc -l'
+        cmd: "virsh dumpxml {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} | grep '<mac' | wc -l"
       ignore_errors: yes
       register: vm_nic_num
     
