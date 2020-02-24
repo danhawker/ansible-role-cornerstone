@@ -80,9 +80,6 @@
   when:
     - vm_data.instances
 
-#    "{{ item.cornerstone_vmvar }}"
-#  with_items: "{{ from_template.cs_vmvar }}"
-
 - name: "[Cornerstone - VM] Register IP with Temporary Host Group named after the Purpose tag"
   add_host:
     hostname: "{{ cornerstone_vm_ipaddress }}"
@@ -105,4 +102,3 @@
     - vm_data.instances
     - cornerstone_tag_role != ""
 
-      #  loop: "{{ lookup('dict', cornerstone_ssh_vars) }}"

@@ -1,5 +1,5 @@
-Role Name
-=========
+ansible-role-cornerstone
+========================
 
 > The Cornerstone is the first stone set in the construction of a masonry foundation, important since all other stones will be set in reference to this stone, thus determining the position of the entire structure.
 
@@ -73,6 +73,10 @@ Available variables are listed below, along with default values (see defaults/ma
       - "10.1.16.0/20"
       - "10.1.32.0/20"
 
+    # Currently only with Libvirt can you add additional network interfaces.
+    cornerstone_vm_extra_nics: 1  # Supports any numeric number for the amount of nics you wish to add. These are additional nics. So currently nic + value here.
+    cornerstone_vm_netname: default # In libvirt this is the name of the network you wish the nic to be part of. "virsh net-list" will show the networks.
+
     # Private or Public IP
     cornerstone_vm_assign_public_ip: true
     cornerstone_vm_public_ip: <elastic ip precreated>
@@ -139,6 +143,9 @@ Available variables are listed below, along with default values (see defaults/ma
 
     cornerstone_vm_data_disk_size: 64
 
+    # The device name you want the disk to use when attached to a libvirt vm
+    cornerstone_vm_data_disk_dev: vdb
+
     # Libvirt specific variables
     
     # Where are vms stored, default location is /var/lib/libvirt/images/
@@ -191,28 +198,28 @@ Example Playbook
     - hosts: localhost
       vars:
         cornerstone_sg:
-	  - name: "cs-sg"
-	    description: Security group for aws
-	    region: "{{ cornerstone_location }}"
-	    rules:
-	      - proto: tcp
-	        from_port: 22
-	        to_port: 22
-	        group_name: ""
-	        cidr_ip: 0.0.0.0/0
-	        rule_desc: "allowSSHin_all"
-	      - proto: tcp
-	        from_port: 443
-	        to_port: 443
-	        group_name: ""
-	        cidr_ip: 0.0.0.0/0
-	        rule_desc: "allowHttpsin_all"
-	      - proto: all
-	        from_port: ""
-	        to_port: ""
-	        group_name: "cs-sg"
-	        cidr_ip: 0.0.0.0/0
-	        rule_desc: "allowAllfromSelf"
+	        - name: "cs-sg"
+	          description: Security group for aws
+	          region: "{{ cornerstone_location }}"
+	          rules:
+	            - proto: tcp
+	              from_port: 22
+	              to_port: 22
+	              group_name: ""
+	              cidr_ip: 0.0.0.0/0
+	             rule_desc: "allowSSHin_all"
+	            - proto: tcp
+	              from_port: 443
+	              to_port: 443
+	              group_name: ""
+	              cidr_ip: 0.0.0.0/0
+	              rule_desc: "allowHttpsin_all"
+	            - proto: all
+	              from_port: ""
+	              to_port: ""
+	              group_name: "cs-sg"
+	              cidr_ip: 0.0.0.0/0
+	              rule_desc: "allowAllfromSelf"
         guests:
           aws-instance01:
             cornerstone_platform: aws

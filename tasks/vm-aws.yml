@@ -27,11 +27,6 @@
       instance-state-name: [ "running", "shutting-down", "stopping", "stopped" ]
   register: vm_data
 
-  #- name: debugging
-  #  debug:
-  #    msg: "{{ vm_data }}"
-
-
 # Set the existing subnet
 - name: "[Cornerstone - AWS] Set Instance_ID of Existing VM"
   set_fact:
@@ -73,6 +68,12 @@
   when: not vm_data.instances 
 
 # Create the VM (baseline no data disks)
+- set_fact:
+    from_template: "{{ lookup('template', '../templates/aws_tags_template.j2') }}"
+  vars:
+    to_cornerstone_template_aws_sg: "{{ cornerstone_sg }}"
+#    to_cornerstone_template_aws_sg: "{{ cornerstone_sg }}"
+
 - name: "[Cornerstone - AWS] Create/Delete VM - {{ cornerstone_vm_name }}"
   ec2_instance:
     name: "{{ cornerstone_vm_name }}"
@@ -140,6 +141,9 @@
       Role: "{{ cornerstone_tag_role }}"
   when: cornerstone_vm_data_disk
   register: output_vm_"{{ cornerstone_vm_name }}"
+
+# At some point we need to workout how to add custom tags. For openshift deployments we need this.
+#kubernetes.io/cluster/openshift: "clusterid"
 
 # Associate Elastic IP with instance, if EIP has been precreated. 
 - name: "associate new elastic IPs with each of the instances"
