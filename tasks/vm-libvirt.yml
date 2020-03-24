@@ -107,7 +107,15 @@
         - cornerstone_vm_name not in disks.stdout 
         - cornerstone_vm_libvirt_vmtype != "emptyvm"
         - cornerstone_vm_state == 'present'
-    
+   
+    - name: "Set Network For VMs"
+      shell: "virt-xml --network network={{cornerstone_virtual_network_name}},model=virtio {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --edit"
+      when:
+        - cornerstone_vm_name not in disks.stdout
+        - cornerstone_vm_libvirt_vmtype != "emptyvm"
+        - cornerstone_vm_state == 'present'
+
+ 
     - name: "Increase disk sizes"
       shell: "qemu-img resize {{ cornerstone_vm_location }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.{{ cornerstone_vm_libvirt_file_type }} +{{ cornerstone_vm_os_disk_size }}G"
       when: 
