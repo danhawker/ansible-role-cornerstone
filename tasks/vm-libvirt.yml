@@ -59,7 +59,11 @@
       file: path={{ cornerstone_working_dir }}{{ cornerstone_vm_name }} state=directory
       when: 
         - cornerstone_vm_name not in disks.stdout
-     
+
+# Need to add a section were we squirt in root passwords.
+# virt-customize --root-password password:password123 -a rhel-8.2-x86_64-kvm.qcow2
+#
+
     - name: "Clone Image"
       command: >
                virt-clone --connect qemu:///system --original {{ cornerstone_vm_libvirt_template }} 
@@ -177,7 +181,15 @@
         - cornerstone_vm_name not in disks.stdout 
         - cornerstone_vm_libvirt_vmtype != "emptyvm"
         - cornerstone_vm_state == 'present'
-    
+
+    - name: "Set root password on VM if requested"
+      shell: "virt-customize --root-password password:{{cornerstone_root_password}} -d {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
+      when:
+        - cornerstone_vm_name not in disks.stdout
+        - cornerstone_vm_libvirt_vmtype != "emptyvm"
+        - cornerstone_vm_state == 'present'
+        - cornerstone_vm_set_root_password == "yes"
+
           #    - cornerstone_vm_libvirt_template == 'rhel7-image'
     
     # If a new image is created you will need to run the following command on the image else you wont be able to ssh to the cloned systems.

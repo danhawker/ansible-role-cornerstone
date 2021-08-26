@@ -8,13 +8,29 @@
 #
 #
 
+# Add storage account
+
+#- name: "try to set a unique storageaccount name"
+#  set_fact:
+#    storageaccount_name: "{{ cornerstone_azure_resource_group }}{{ cornerstone_vm_name }}"
+
+#- name: "Create a storage account"
+#  azure_rm_storageaccount:
+#    resource_group: "{{ cornerstone_azure_resource_group }}"
+#    name: "{{ storageaccount_name }}"
+#    type: "{{ cornerstone_storage_type }}"
+
+
+#    storage_account_name: "{{ storageaccount_name }}"
+
 # Create the VM (baseline no data disks)
 - name: "[Cornerstone - Azure] Create VM"
   azure_rm_virtualmachine:
     resource_group: "{{ cornerstone_azure_resource_group }}"
-    name: "{{ cornerstone_prefix }}-vm"
-    managed_disk_type: "{{ cornerstone_azure_vm_disk_managed }}"
+    name: "{{ cornerstone_vm_name }}"
+    state: "{{ cornerstone_vm_state }}"
     vm_size: "{{ cornerstone_vm_flavour }}"
+    managed_disk_type: "{{ cornerstone_azure_vm_disk_managed }}"
     admin_username: "{{ cornerstone_ssh_admin_username }}"
     ssh_password_enabled: false
     ssh_public_keys:
@@ -24,19 +40,21 @@
     image:
       offer: "{{ cornerstone_vm_image_offer }}"
       publisher: "{{ cornerstone_vm_image_publisher }}"
-      sku: "{{ cornerstone_vm_image_sku }}"
+      sku: '{{ cornerstone_vm_image_sku }}'
       version: "{{ cornerstone_vm_image_version }}"
-    os_disk_size_gb: "{{ cornerstone_vm_os_disk_size }}"
   when: not cornerstone_vm_data_disk
   async: 1000
   poll: 0
   register: output_vm
 
+
 # Check VM is Alive
 - name: "[Cornerstone - Azure] Check VM is Alive"
   async_status:
     jid: "{{ output_vm.ansible_job_id }}"
-  when: not cornerstone_vm_data_disk
+  when: 
+    - not cornerstone_vm_data_disk
+    - cornerstone_vm_state == "present"
   register: vm_result
   until: vm_result.finished
   retries: 30

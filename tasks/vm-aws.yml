@@ -88,7 +88,7 @@
     volumes:
       - device_name: /dev/sda1
         ebs:
-          volume_size: "{{ cornerstone_vm_os_disk_size }}"
+          volume_size: "{{ cornerstone_vm_os_disk_size | int }}"
     network:
       assign_public_ip: "{{ cornerstone_vm_assign_public_ip }}" 
       private_ip_address: "{{ cornerstone_vm_private_ip }}"
@@ -97,8 +97,9 @@
       Project: "{{ cornerstone_prefix }}"
       Purpose: "{{ cornerstone_tag_purpose }}"
       Role: "{{ cornerstone_tag_role }}"
+      kubernetes.io/cluster/openshift: "clusterid"
   when: not cornerstone_vm_data_disk
-  register: output_vm_"{{ cornerstone_vm_name }}"
+  register: output_vm
 
 # Check VM is Alive
 # The ec2_instance module has a wait functions built in, so no need.
@@ -130,17 +131,18 @@
     volumes:
       - device_name: /dev/sda1
         ebs:
-          volume_size: "{{ cornerstone_vm_os_disk_size }}"
+          volume_size: "{{ cornerstone_vm_os_disk_size | int }}"
       - device_name: "{{ cornerstone_vm_data_disk_device_name }}"
         ebs:
-          volume_size: "{{ cornerstone_vm_data_disk_size }}" 
+          volume_size: "{{ cornerstone_vm_data_disk_size | int }}" 
           delete_on_termination: true
     tags:
       Project: "{{ cornerstone_prefix }}"
       Purpose: "{{ cornerstone_tag_purpose }}"
       Role: "{{ cornerstone_tag_role }}"
+      kubernetes.io/cluster/openshift: "clusterid"
   when: cornerstone_vm_data_disk
-  register: output_vm_"{{ cornerstone_vm_name }}"
+  register: output_vm
 
 # At some point we need to workout how to add custom tags. For openshift deployments we need this.
 #kubernetes.io/cluster/openshift: "clusterid"
