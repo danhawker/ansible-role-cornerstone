@@ -14,6 +14,7 @@
     allocation_method: "{{ cornerstone_publicip_allocation_method }}"
     domain_name: "{{ cornerstone_publicip_domain_name }}"
     name: "{{ cornerstone_prefix }}-ip"
+    location: "{{ cornerstone_location }}"
   async: 150
   poll: 0
   register: cornerstone_public_ip_output
@@ -28,6 +29,7 @@
 - name: "[Cornerstone - Azure] Create NSG"
   azure_rm_securitygroup:
     resource_group: "{{ cornerstone_azure_resource_group }}"
+    location: "{{ cornerstone_location }}"
     name: "{{ cornerstone_prefix }}-nsg"
     rules:
       - name: allowSSHin_all
@@ -54,6 +56,7 @@
 - name: "[Cornerstone - Azure] Create Virtual NIC"
   azure_rm_networkinterface:
     resource_group: "{{ cornerstone_azure_resource_group }}"
+    location: "{{ cornerstone_location }}"
     name: "{{ cornerstone_prefix }}-nic"
     virtual_network: "{{ cornerstone_virtual_network_name }}"
     subnet: "{{ cornerstone_subnet_name }}"

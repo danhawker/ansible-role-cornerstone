@@ -27,6 +27,7 @@
 - name: "[Cornerstone - Azure] Create VM"
   azure_rm_virtualmachine:
     resource_group: "{{ cornerstone_azure_resource_group }}"
+    location: "{{ cornerstone_location }}"
     name: "{{ cornerstone_vm_name }}"
     state: "{{ cornerstone_vm_state }}"
     vm_size: "{{ cornerstone_vm_flavour }}"
@@ -65,6 +66,7 @@
 - name: "[Cornerstone - Azure] Create VM + Data Disk"
   azure_rm_virtualmachine:
     resource_group: "{{ cornerstone_azure_resource_group }}"
+    location: "{{ cornerstone_location }}"
     name: "{{ cornerstone_prefix }}-vm"
     managed_disk_type: "{{ cornerstone_azure_vm_disk_managed }}"
     vm_size: "{{ cornerstone_vm_flavour }}"
