@@ -269,6 +269,18 @@ Example Playbook
       roles:
          - role: danhawker.cornerstone
 
+---
+
+- name: Build Instance  
+  hosts: localhost
+  vars_files:
+    - /Users/oezeakachi/AAP-Lab/roles/ansible-role-cornerstone-obi/vars/main.yml
+
+  tasks:
+    - include_role:
+        name: roles/ansible-role-cornerstone-obi
+
+
 # For Azure you cannot use the guest layout yet. The task will only create one instance at a time.
 
 Future Releases
