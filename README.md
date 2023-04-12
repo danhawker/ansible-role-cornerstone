@@ -277,18 +277,17 @@ Example Playbook
 - name: Build Instance  
   hosts: localhost
   vars_files:
-    - /Users/oezeakachi/AAP-Lab/roles/ansible-role-cornerstone-obi/vars/main.yml
+    - roles/ansible-role-cornerstone/vars/main.yml
 
   tasks:
     - include_role:
-        name: roles/ansible-role-cornerstone-obi
+        name: roles/ansible-role-cornerstone
 ```
 
 ## Obinna Ezeakachi's vars file example in the var folder 
 
 ```yaml
 ---
-# vars file for cornerstone
 ansible_python_interpreter: /usr/bin/python3
 cornerstone_prefix: cs
 cornerstone_ssh_admin_username: rhadmin
@@ -296,13 +295,13 @@ cornerstone_ssh_admin_pubkey:
 cornerstone_aws_ssh_key_name: ssh-test
 cornerstone_aws_profile: default
 cornerstone_ssh_user: ec2-user
-cornerstone_ssh_key_path: "/Users/oezeakachi/Desktop/key/ssh-test.pem"
+cornerstone_ssh_key_path: "ssh_key.pem"
 
 cornerstone_platform: aws
 cornerstone_location: eu-west-1
 
 cornerstone_sg:
-  - name: "obitestworkshop-sg"
+  - name: "testworkshop-sg"
     description: Security group for aws
     region: "{{ cornerstone_location }}"
     rules:
@@ -321,7 +320,7 @@ cornerstone_sg:
       - proto: all
         from_port: ""
         to_port: ""
-        group_name: "obitestworkshop-sg"
+        group_name: "testworkshop-sg"
         cidr_ip: 0.0.0.0/0
         rule_desc: "allowAllfromSelf"
 
@@ -338,14 +337,14 @@ guests:
       cornerstone_vm_aws_az: eu-west-1a
       cornerstone_vm_flavour: t3.2xlarge
       cornerstone_vm_aws_ami: ami-0b04ce5d876a9ba29
-      cornerstone_vm_aws_sg: obitestworkshop-sg
+      cornerstone_vm_aws_sg: testworkshop-sg
       cornerstone_virtual_network_name: "{{ cornerstone_prefix }}vnet"
       cornerstone_virtual_network_cidr: "10.1.0.0/16"
       cornerstone_subnet_name: "{{ cornerstone_prefix }}subnet"
       cornerstone_public_private_ip: public
       cornerstone_vm_private_ip:
       cornerstone_vm_assign_public_ip: yes
-      cornerstone_vm_public_ip: 34.248.68.57
+      cornerstone_vm_public_ip: <ip>
       cornerstone_publicip_allocation_method: Dynamic
       cornerstone_publicip_domain_name: null
       cornerstone_vm_os_disk_size: 10
@@ -370,43 +369,21 @@ guests:
       cornerstone_public_private_ip: public
       cornerstone_vm_private_ip:
       cornerstone_vm_assign_public_ip: yes
-      cornerstone_vm_public_ip: 52.18.234.20
+      cornerstone_vm_public_ip: <ip>
       cornerstone_publicip_allocation_method: Dynamic
       cornerstone_publicip_domain_name: null
       cornerstone_vm_os_disk_size: 10
       cornerstone_vm_data_disk: false
       cornerstone_vm_data_disk_device_name: "/dev/xvdb"
       cornerstone_aws_vm_data_disk_managed: "gp2"
-      cornerstone_vm_data_disk_size: "50"
-  testsystem3:
-      cornerstone_vm_state: "{{vm_state}}"
-      cornerstone_platform: aws
-      cornerstone_tag_purpose: "Testing"
-      cornerstone_tag_role: "testsystem"
-      cornerstone_vm_name: testsystem3
-      cornerstone_location: eu-west-1
-      cornerstone_vm_aws_az: eu-west-1a
-      cornerstone_vm_flavour: t3.2xlarge
-      cornerstone_vm_aws_ami: ami-0b04ce5d876a9ba29
-      cornerstone_vm_aws_sg: obitestworkshop-sg
-      cornerstone_virtual_network_name: "{{ cornerstone_prefix }}vnet"
-      cornerstone_virtual_network_cidr: "10.1.0.0/16"
-      cornerstone_subnet_name: "{{ cornerstone_prefix }}subnet"
-      cornerstone_public_private_ip: public
-      cornerstone_vm_private_ip:
-      cornerstone_vm_assign_public_ip: yes
-      cornerstone_vm_public_ip: 52.214.229.143
-      cornerstone_publicip_allocation_method: Dynamic
-      cornerstone_publicip_domain_name: null
-      cornerstone_vm_os_disk_size: 10
-      cornerstone_vm_data_disk: false
-      cornerstone_vm_data_disk_device_name: "/dev/xvdb"
-      cornerstone_aws_vm_data_disk_managed: "gp2"
-      cornerstone_vm_data_disk_size: "50"
+      cornerstone_vm_data_disk_size: "50" 
 
+# duplicate the testsystem config if you want to create more instances 
 ```
 
 # For Azure you cannot use the guest layout yet. The task will only create one instance at a time.
+
+# For aws please configure the aws cli with the access key and secret access key creds
 
 Future Releases
 ---------------
@@ -426,3 +403,4 @@ Author Information
 
 Dan Hawker [Github](https://github.com/danhawker)
 Ken Hitchcock - Contributor
+Obi Ezeakachi - Contributor
