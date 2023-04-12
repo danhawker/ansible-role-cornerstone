@@ -17,7 +17,7 @@
 
 # Discover Public IP Address of VM
 - name: "[Cornerstone - AWS VM] Discover Public DNS/IP Address"
-  ec2_instance_facts:
+  amazon.aws.ec2_instance_info:
     region: "{{ cornerstone_location }}"
     profile: "{{ cornerstone_aws_profile }}"
     filters:
