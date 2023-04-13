@@ -269,7 +269,8 @@ Example Playbook
       roles:
          - role: danhawker.cornerstone
 
-## Obinna Ezeakachi's playbook example 
+## Playbook example 2
+---------------------
 
 ```yaml
 ---
@@ -284,7 +285,7 @@ Example Playbook
         name: roles/ansible-role-cornerstone
 ```
 
-## Obinna Ezeakachi's vars file example in the var folder 
+## vars file example in the var folder for 2nd Playbook example
 
 ```yaml
 ---
@@ -378,8 +379,9 @@ guests:
       cornerstone_aws_vm_data_disk_managed: "gp2"
       cornerstone_vm_data_disk_size: "50" 
 
-# duplicate the testsystem config if you want to create more instances 
+
 ```
+# duplicate the testsystem config if you want to create more instances i.e testsystem3 and its settings and so forth 
 
 # For Azure you cannot use the guest layout yet. The task will only create one instance at a time.
 
