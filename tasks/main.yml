@@ -35,6 +35,7 @@
   # ============================== #
 
 - name: Build vms based on dict
+  #include_tasks: "vm-{{ item.value.cornerstone_platform }}.yml"
   include_tasks: "vm-{{ item.value.cornerstone_platform }}.yml"
   vars:
     cornerstone_tag_purpose: "{{ item.value.cornerstone_tag_purpose }}"
