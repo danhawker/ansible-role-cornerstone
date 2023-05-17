@@ -1,0 +1,19 @@
+{
+  "cornerstone_sg": [
+    {% for cornerstone_sg in to_cornerstone_template_gcp_sg %}
+    {
+      "rules": [
+        {% for rule in cornerstone_sg.rules %}
+        {
+	  "ip_protocol": "{{ rule.proto }}",
+	  {% if rule.from_port != "" %}
+          "ports": "{{ rule.from_port }}" 
+          {% endif %}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+      ]
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+

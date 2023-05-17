@@ -117,6 +117,14 @@
     cornerstone_vmware_iso_name: "{{ item.value.cornerstone_vmware_iso_name }}"
     cornerstone_vmware_network_name: "{{ item.value.cornerstone_vmware_network_name }}"
     cornerstone_vmware_nic_mac: "{{ item.value.cornerstone_vmware_nic_mac }}"
+    # ========================================================================== #
+    # BELOW ARE THE GCP RELATED ITEMS
+    # ========================================================================== #
+    cornerstone_gcp_project: "{{ item.value.cornerstone_gcp_project }}"
+    cornerstone_gcp_auth_kind: "{{ item.value.cornerstone_gcp_auth_kind }}"
+    cornerstone_service_account_file: "{{ item.value.cornerstone_service_account_file }}"
+    cornerstone_gcp_zone: "{{ item.value.cornerstone_gcp_zone }}"
+    cornerstone_vm_gcp_source_image: "{{ item.value.cornerstone_vm_gcp_source_image }}"
   loop: "{{ guests|dict2items }}"  
   tags: [vm, "{{ cornerstone_platform }}"]
 

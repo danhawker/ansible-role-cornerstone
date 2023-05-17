@@ -1,0 +1,65 @@
+---
+# tasks file for cornerstone:vm-aws.yml
+
+#
+# -----------------------------------------------------------------------------
+# Virtual Machine Tasks
+# -----------------------------------------------------------------------------
+#
+
+
+- name: "Create IP address for instance name"
+  gcp_compute_address:
+    name: "{{ cornerstone_vm_name }}"
+    region: "{{ cornerstone_location }}"
+    project: "{{ cornerstone_gcp_project }}"
+    auth_kind: "{{ cornerstone_gcp_auth_kind }}"
+    service_account_file: "{{ cornerstone_service_account_file }}"
+    state: present
+  register: address
+
+- name: "Create disk for new instance"
+  gcp_compute_disk:
+    name: "{{ cornerstone_vm_name }}"
+    size_gb: "{{ cornerstone_vm_os_disk_size | int }}"
+    source_image: "{{ cornerstone_vm_gcp_source_image }}"
+    zone: "{{ cornerstone_gcp_zone }}"
+    project: "{{ cornerstone_gcp_project }}"
+    auth_kind: "{{ cornerstone_gcp_auth_kind }}"
+    service_account_file: "{{ cornerstone_service_account_file }}"
+    state: present
+  register: disk
+
+# FInd gcp image names
+# projects/centos-cloud/global/images/centos-7-v20190116
+
+- name: Create new instance
+  gcp_compute_instance:
+    state: present
+    name: "{{ cornerstone_vm_name }}"
+    machine_type: "{{ cornerstone_vm_flavour }}"
+    disks:
+    - auto_delete: true
+      boot: true
+      source: "{{ disk }}"
+    network_interfaces:
+    - network: "{{ vpc }}"
+      subnetwork: "{{ subnet }}"
+      access_configs:
+      - name: External NAT
+        nat_ip: "{{ address }}"
+        type: ONE_TO_ONE_NAT
+    zone: "{{ cornerstone_gcp_zone }}"
+    tags:
+      items:
+        - "{{ cornerstone_tag_purpose }}"
+        - "{{ cornerstone_prefix }}-firewall"
+    project: "{{ cornerstone_gcp_project }}"
+    auth_kind: "{{ cornerstone_gcp_auth_kind }}"
+    service_account_file: "{{ cornerstone_service_account_file }}"
+  register: instance
+
+- debug:
+    var: instance
+
+

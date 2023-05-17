@@ -94,4 +94,13 @@ cornerstone_vm_os_disk_size: 20
 cornerstone_vm_data_disk: false
 cornerstone_vm_data_disk_size: 64
 
+# GCP related variables that need to be set
+cornerstone_gcp_project: "SET ME IN DICT"
+cornerstone_gcp_auth_kind: "SET ME IN DICT"
+cornerstone_service_account_file: "SET ME IN DICT"
+cornerstone_gcp_zone: "SET ME IN DICT"
+cornerstone_vm_gcp_source_image: "SET ME IN DICT"
+
+
+
 # EOF

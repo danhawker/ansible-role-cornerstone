@@ -1,0 +1,21 @@
+---
+# tasks file for cornerstone:common-gcp.yml
+
+#
+# -----------------------------------------------------------------------------
+# Common Tasks
+# -----------------------------------------------------------------------------
+# All the other tasks require these tasks
+#
+
+- name: "[Cornerstone - GCP] Create VPC Network"
+  google.cloud.gcp_compute_network:
+    name: "{{ cornerstone_virtual_network_name }}"
+    auto_create_subnetworks: yes
+    project: "{{ cornerstone_gcp_project }}"
+    auth_kind: "{{ cornerstone_gcp_auth_kind }}"
+    service_account_file: "{{ cornerstone_service_account_file }}"
+    state: present
+  when: cornerstone_gcp_auth_kind == "serviceaccount"
+  register: vpc
+
