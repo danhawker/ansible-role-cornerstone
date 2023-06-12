@@ -1,5 +1,5 @@
 galaxy_info:
-  role_name: cornerstone
+  role_name: cornerstone-obi
   author: Dan Hawker
   description: Cornerstone - Simple, automated VM provisioning in various public/private clouds
   company: None
