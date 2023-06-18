@@ -387,6 +387,61 @@ guests:
 
 # For aws please configure the aws cli with the access key and secret access key creds
 
+
+## Libvrt vars file example 
+
+```
+cornerstone_prefix: cs
+cornerstone_ssh_user: root
+cornerstone_ssh_key_path: # Give a path to ssh key or it will just default to the root user ssh key
+cornerstone_platform: libvirt
+
+vm_state: present 
+vm_ip: 192.168.xxx.xxx
+
+guests:
+  rhel8-basicvm01:
+    cornerstone_platform: libvirt
+    cornerstone_vm_location: '<define_value>' # This where the qemu vm lives with the qemu image file so when creating in qemu gui make sure they live here
+    cornerstone_working_dir: '/tmp/'
+    cornerstone_vm_libvirt_template: '<define_value>' # Name of Qemu vm 
+    cornerstone_vm_libvirt_file_type: 'qcow2'
+    cornerstone_vm_libvirt_vmtype:
+    cornerstone_vm_libvirt_vmos: 'linux'
+    cornerstone_vm_subnet: 24
+    cornerstone_vm_gateway: 192.168.xxx.xxx
+    cornerstone_vm_dns1: 192.168.xxx.xxx
+    cornerstone_vm_dns2: 8.8.8.8 
+    cornerstone_vm_name: 'rhel8-basicvm02'
+    cornerstone_vm_state: "{{vm_state}}" 
+    cornerstone_public_private_domain_name: '<define_value>.local'
+    cornerstone_vm_os_disk_size: 20
+    cornerstone_vm_data_disk: false
+    cornerstone_vm_data_disk_size: 10
+    cornerstone_vm_data_disk_dev: "vdb"
+    cornerstone_vm_libvirt_vmmem: 2048
+    cornerstone_vm_libvirt_vmcores: 2
+    cornerstone_vm_ip: "{{ vm_ip }}"
+    cornerstone_tag_purpose: "basicvm"
+    cornerstone_tag_role: "testing"
+    cornerstone_virtual_network_name: default
+    cornerstone_python_interpreter: "/bin/python"
+    cornerstone_vm_extra_nics: 0
+    cornerstone_vm_netname: default 
+```
+
+## Required Libvrt-related packages 
+
+qemu-kvm  – An opensource emulator and virtualization package that provides hardware emulation.
+
+libvirt – A package that provides configuration files required to run the libvirt daemon.
+
+virtinst – A set of command-line utilities for provisioning and modifying virtual machines.
+
+Virt-install – A command-line tool for creating virtual machines from the command-line.
+
+bridge-utils – A set of tools for creating and managing bridge devices.
+
 Future Releases
 ---------------
 
