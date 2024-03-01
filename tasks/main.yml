@@ -6,7 +6,7 @@
 # Common Tasks
 # =============================================================================
 #
-- include: common-{{ cornerstone_platform }}.yml
+- include_tasks: common-{{ cornerstone_platform }}.yml
   tags: [common, "{{ cornerstone_platform }}"]
   when:
     - cornerstone_platform != 'libvirt'
@@ -16,7 +16,7 @@
 # Network Tasks
 # =============================================================================
 #
-- include: network-{{ cornerstone_platform }}.yml
+- include_tasks: network-{{ cornerstone_platform }}.yml
   tags: [network, "{{ cornerstone_platform }}"]
   when:
     - cornerstone_platform != 'libvirt'
@@ -27,7 +27,7 @@
 # feature/adding_vmware_capabilities
 # =============================================================================
 
-#  include: "vm-{{ item.value.cornerstone_platform }}.yml"
+#  include_tasks: "vm-{{ item.value.cornerstone_platform }}.yml"
 
   # ============================== #
   #   CURRENT SUPPORT PLATFORMS:   #
@@ -117,9 +117,9 @@
     cornerstone_vmware_iso_name: "{{ item.value.cornerstone_vmware_iso_name }}"
     cornerstone_vmware_network_name: "{{ item.value.cornerstone_vmware_network_name }}"
     cornerstone_vmware_nic_mac: "{{ item.value.cornerstone_vmware_nic_mac }}"
-    # ========================================================================== #
-    # BELOW ARE THE GCP RELATED ITEMS
-    # ========================================================================== #
+# ========================================================================== #
+# BELOW ARE THE GCP RELATED ITEMS
+# ========================================================================== #
     cornerstone_gcp_project: "{{ item.value.cornerstone_gcp_project }}"
     cornerstone_gcp_auth_kind: "{{ item.value.cornerstone_gcp_auth_kind }}"
     cornerstone_service_account_file: "{{ item.value.cornerstone_service_account_file }}"
@@ -133,7 +133,7 @@
 # =============================================================================
 
 - name: Discover IP address tasks
-  include: discover-ip-{{ cornerstone_platform }}.yml
+  include_tasks: discover-ip-{{ cornerstone_platform }}.yml
   vars:
     cornerstone_platform: "{{ item.value.cornerstone_platform }}"
     cornerstone_tag_purpose: "{{ item.value.cornerstone_tag_purpose }}"

@@ -9,7 +9,7 @@
 #
 
 - name: "[Cornerstone - AWS] Create VPC"
-  ec2_vpc_net:
+  amazon.aws.ec2_vpc_net:
     state: present
     cidr_block: "{{ cornerstone_virtual_network_cidr }}"
     dns_support: true
