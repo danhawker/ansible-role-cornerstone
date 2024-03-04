@@ -138,7 +138,7 @@
 
     - name: "Create network configuration for each VM"
       shell: echo -e "BOOTPROTO=static
-             \nDEVICE=enp1s0
+             \nDEVICE={{ cornerstone_vm_network_device }}
              \nONBOOT=yes
              \nTYPE=Ethernet
              \nIPADDR={{ cornerstone_vm_ip }}
@@ -146,7 +146,7 @@
              \nGATEWAY={{ cornerstone_vm_gateway }}
              \nDNS1={{ cornerstone_vm_dns1 }}
              \nDNS2={{ cornerstone_vm_dns2 }}
-             \nDOMAIN={{ cornerstone_public_private_domain_name }}" >>{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/ifcfg-enp1s0
+             \nDOMAIN={{ cornerstone_public_private_domain_name }}" >>{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/ifcfg-eth0
       when: 
         - cornerstone_vm_name not in disks.stdout 
         - cornerstone_vm_libvirt_vmtype != "emptyvm"
@@ -163,7 +163,7 @@
         - cornerstone_vm_state == 'present'
     
     - name: "Set Hostname and Copy in network configuration"
-      shell: "virt-customize --hostname {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/ifcfg-enp1s0:/etc/sysconfig/network-scripts/ --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/hosts:/etc/ --edit /etc/ssh/sshd_config:'s/^#UseDNS yes/UseDNS no/' -d {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
+      shell: "virt-customize --hostname {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/ifcfg-{{ cornerstone_vm_network_device }}:/etc/sysconfig/network-scripts/ --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/hosts:/etc/ --edit /etc/ssh/sshd_config:'s/^#UseDNS yes/UseDNS no/' -d {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
       when: 
         - cornerstone_vm_name not in disks.stdout 
         - cornerstone_vm_libvirt_vmtype != "emptyvm"

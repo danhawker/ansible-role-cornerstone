@@ -71,6 +71,7 @@
     cornerstone_vm_libvirt_vmos: "{{ item.value.cornerstone_vm_libvirt_vmos }}"
     cornerstone_vm_libvirt_vmmem: "{{ item.value.cornerstone_vm_libvirt_vmmem }}"
     cornerstone_vm_libvirt_vmcores: "{{ item.value.cornerstone_vm_libvirt_vmcores }}"
+    cornerstone_vm_network_device: "{{ item.value.cornerstone_vm_network_device }}"
     cornerstone_vm_subnet: "{{ item.value.cornerstone_vm_subnet }}" 
     cornerstone_vm_gateway: "{{ item.value.cornerstone_vm_gateway }}"
     cornerstone_vm_dns1: "{{ item.value.cornerstone_vm_dns1 }}"

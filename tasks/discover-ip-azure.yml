@@ -14,7 +14,7 @@
 
 # Discover Public IP Address of VM
 - name: "[Cornerstone - Azure VM] Discover Public IP Address"
-  azure_rm_publicipaddress_facts:
+  azure_rm_publicipaddress_info:
     resource_group: "{{ cornerstone_azure_resource_group }}"
     name: "{{ cornerstone_prefix }}-ip"
   register: public_ip
@@ -25,7 +25,7 @@
 # Set IP Address as Fact
 - name: "[Cornerstone - Azure VM] Set Public IP Address"
   set_fact:
-      cornerstone_vm_ipaddress: "{{ public_ip.ansible_facts.azure_publicipaddresses[0].properties.ipAddress }}"
+      cornerstone_vm_ipaddress: "{{ public_ip.publicipaddresses[0].ip_address }}"
   when:
     - public_ip
     - cornerstone_public_private_ip == "public"
@@ -33,7 +33,7 @@
 
 # Discover Private IP Address of VM
 - name: "[Cornerstone - Azure VM] Discover Private IP Address"
-  azure_rm_networkinterface_facts:
+  azure_rm_networkinterface_info:
     resource_group: "{{ cornerstone_azure_resource_group }}"
     name: "{{ cornerstone_prefix }}-nic"
   register: nic_data
