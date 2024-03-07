@@ -9,7 +9,7 @@
 
 # Retrieve AZ Info
 - name: "[Cornerstone - AWS] Retrieve AZ Information"
-  aws_az_facts:
+  amazon.aws.aws_az_info:
     region: "{{ cornerstone_location }}"
     profile: "{{ cornerstone_aws_profile }}"
   register: azs
@@ -52,7 +52,7 @@
 
 # Update Route Tables for IGW
 - name: "[Cornerstone - AWS] Retrieve VPC Route Table"
-  ec2_vpc_route_table_facts:
+  community.aws.ec2_vpc_route_table_info:
     region: "{{ cornerstone_location }}"
     profile: "{{ cornerstone_aws_profile }}"
     filters:

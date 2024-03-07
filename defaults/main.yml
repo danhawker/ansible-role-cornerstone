@@ -76,7 +76,10 @@ cornerstone_vm_libvirt_vmtype:
 cornerstone_vm_libvirt_vmos: 'linux'
 cornerstone_vm_libvirt_vmmem: 2
 cornerstone_vm_libvirt_vmcores: 1
+cornerstone_vm_network_device: enp1s0
 
+cornerstone_vm_set_root_password: "yes"
+cornerstone_root_password: "password123"
 
 # Disks
 # Type of managed disk (AWS)
@@ -91,5 +94,14 @@ cornerstone_vm_os_disk_size: 20
 # Do we want a separate data disk?
 cornerstone_vm_data_disk: false
 cornerstone_vm_data_disk_size: 64
+
+# GCP related variables that need to be set
+cornerstone_gcp_project: "SET ME IN DICT"
+cornerstone_gcp_auth_kind: "SET ME IN DICT"
+cornerstone_service_account_file: "SET ME IN DICT"
+cornerstone_gcp_zone: "SET ME IN DICT"
+cornerstone_vm_gcp_source_image: "SET ME IN DICT"
+
+
 
 # EOF

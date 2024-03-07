@@ -269,7 +269,178 @@ Example Playbook
       roles:
          - role: danhawker.cornerstone
 
+## Playbook example 2
+---------------------
+
+```yaml
+---
+
+- name: Build Instance  
+  hosts: localhost
+  vars_files:
+    - roles/ansible-role-cornerstone/vars/main.yml
+
+  tasks:
+    - include_role:
+        name: roles/ansible-role-cornerstone
+```
+
+## vars file example in the var folder for 2nd Playbook example
+
+```yaml
+---
+ansible_python_interpreter: /usr/bin/python3
+cornerstone_prefix: cs
+cornerstone_ssh_admin_username: rhadmin
+cornerstone_ssh_admin_pubkey:
+cornerstone_aws_ssh_key_name: ssh-test
+cornerstone_aws_profile: default
+cornerstone_ssh_user: ec2-user
+cornerstone_ssh_key_path: "ssh_key.pem"
+
+cornerstone_platform: aws
+cornerstone_location: eu-west-1
+
+cornerstone_sg:
+  - name: "testworkshop-sg"
+    description: Security group for aws
+    region: "{{ cornerstone_location }}"
+    rules:
+      - proto: tcp
+        from_port: 22
+        to_port: 22
+        group_name: ""
+        cidr_ip: 0.0.0.0/0
+        rule_desc: "allowSSHin_all"
+      - proto: tcp
+        from_port: 443
+        to_port: 443
+        group_name: ""
+        cidr_ip: 0.0.0.0/0
+        rule_desc: "allowHttpsin_all"
+      - proto: all
+        from_port: ""
+        to_port: ""
+        group_name: "testworkshop-sg"
+        cidr_ip: 0.0.0.0/0
+        rule_desc: "allowAllfromSelf"
+
+vm_state: present
+
+guests:
+  testsystem1:
+      cornerstone_vm_state: "{{vm_state}}"
+      cornerstone_platform: aws
+      cornerstone_tag_purpose: "Testing"
+      cornerstone_tag_role: "testsystem"
+      cornerstone_vm_name: testsystem1
+      cornerstone_location: eu-west-1
+      cornerstone_vm_aws_az: eu-west-1a
+      cornerstone_vm_flavour: t3.2xlarge
+      cornerstone_vm_aws_ami: ami-0b04ce5d876a9ba29
+      cornerstone_vm_aws_sg: testworkshop-sg
+      cornerstone_virtual_network_name: "{{ cornerstone_prefix }}vnet"
+      cornerstone_virtual_network_cidr: "10.1.0.0/16"
+      cornerstone_subnet_name: "{{ cornerstone_prefix }}subnet"
+      cornerstone_public_private_ip: public
+      cornerstone_vm_private_ip:
+      cornerstone_vm_assign_public_ip: yes
+      cornerstone_vm_public_ip: <ip>
+      cornerstone_publicip_allocation_method: Dynamic
+      cornerstone_publicip_domain_name: null
+      cornerstone_vm_os_disk_size: 10
+      cornerstone_vm_data_disk: false
+      cornerstone_vm_data_disk_device_name: "/dev/xvdb"
+      cornerstone_aws_vm_data_disk_managed: "gp2"
+      cornerstone_vm_data_disk_size: "50" 
+  testsystem2:
+      cornerstone_vm_state: "{{vm_state}}"
+      cornerstone_platform: aws
+      cornerstone_tag_purpose: "Testing"
+      cornerstone_tag_role: "testsystem"
+      cornerstone_vm_name: testsystem2
+      cornerstone_location: eu-west-1
+      cornerstone_vm_aws_az: eu-west-1a
+      cornerstone_vm_flavour: t3.2xlarge
+      cornerstone_vm_aws_ami: ami-0b04ce5d876a9ba29
+      cornerstone_vm_aws_sg: obitestworkshop-sg
+      cornerstone_virtual_network_name: "{{ cornerstone_prefix }}vnet"
+      cornerstone_virtual_network_cidr: "10.1.0.0/16"
+      cornerstone_subnet_name: "{{ cornerstone_prefix }}subnet"
+      cornerstone_public_private_ip: public
+      cornerstone_vm_private_ip:
+      cornerstone_vm_assign_public_ip: yes
+      cornerstone_vm_public_ip: <ip>
+      cornerstone_publicip_allocation_method: Dynamic
+      cornerstone_publicip_domain_name: null
+      cornerstone_vm_os_disk_size: 10
+      cornerstone_vm_data_disk: false
+      cornerstone_vm_data_disk_device_name: "/dev/xvdb"
+      cornerstone_aws_vm_data_disk_managed: "gp2"
+      cornerstone_vm_data_disk_size: "50" 
+
+
+```
+# duplicate the testsystem config if you want to create more instances i.e testsystem3 and its settings and so forth 
+
 # For Azure you cannot use the guest layout yet. The task will only create one instance at a time.
+
+# For aws please configure the aws cli with the access key and secret access key creds
+
+
+## Libvrt vars file example 
+
+```
+cornerstone_prefix: cs
+cornerstone_ssh_user: root
+cornerstone_ssh_key_path: # Give a path to ssh key or it will just default to the root user ssh key
+cornerstone_platform: libvirt
+
+vm_state: present 
+vm_ip: 192.168.xxx.xxx
+
+guests:
+  rhel8-basicvm01:
+    cornerstone_platform: libvirt
+    cornerstone_vm_location: '<define_value>' # This where the qemu vm lives with the qemu image file so when creating in qemu gui make sure they live here
+    cornerstone_working_dir: '/tmp/'
+    cornerstone_vm_libvirt_template: '<define_value>' # Name of Qemu vm 
+    cornerstone_vm_libvirt_file_type: 'qcow2'
+    cornerstone_vm_libvirt_vmtype:
+    cornerstone_vm_libvirt_vmos: 'linux'
+    cornerstone_vm_subnet: 24
+    cornerstone_vm_gateway: 192.168.xxx.xxx
+    cornerstone_vm_dns1: 192.168.xxx.xxx
+    cornerstone_vm_dns2: 8.8.8.8 
+    cornerstone_vm_name: 'rhel8-basicvm02'
+    cornerstone_vm_state: "{{vm_state}}" 
+    cornerstone_public_private_domain_name: '<define_value>.local'
+    cornerstone_vm_os_disk_size: 20
+    cornerstone_vm_data_disk: false
+    cornerstone_vm_data_disk_size: 10
+    cornerstone_vm_data_disk_dev: "vdb"
+    cornerstone_vm_libvirt_vmmem: 2048
+    cornerstone_vm_libvirt_vmcores: 2
+    cornerstone_vm_ip: "{{ vm_ip }}"
+    cornerstone_tag_purpose: "basicvm"
+    cornerstone_tag_role: "testing"
+    cornerstone_virtual_network_name: default
+    cornerstone_python_interpreter: "/bin/python"
+    cornerstone_vm_extra_nics: 0
+    cornerstone_vm_netname: default 
+```
+
+## Required Libvrt-related packages 
+
+qemu-kvm  – An opensource emulator and virtualization package that provides hardware emulation.
+
+libvirt – A package that provides configuration files required to run the libvirt daemon.
+
+virtinst – A set of command-line utilities for provisioning and modifying virtual machines.
+
+Virt-install – A command-line tool for creating virtual machines from the command-line.
+
+bridge-utils – A set of tools for creating and managing bridge devices.
 
 Future Releases
 ---------------
@@ -289,3 +460,4 @@ Author Information
 
 Dan Hawker [Github](https://github.com/danhawker)
 Ken Hitchcock - Contributor
+Obi Ezeakachi - Contributor

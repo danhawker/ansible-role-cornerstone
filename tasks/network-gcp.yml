@@ -1,0 +1,56 @@
+---
+# tasks file for cornerstone:network-aws.yml
+
+#
+# -----------------------------------------------------------------------------
+# Network Tasks
+# -----------------------------------------------------------------------------
+#
+
+- name: Create subnet within above VPC network
+  gcp_compute_subnetwork:
+    name: "{{ cornerstone_prefix }}-subnet"
+    region: "{{ cornerstone_location }}"
+    network: "{{ vpc }}"
+    ip_cidr_range: "{{ cornerstone_virtual_network_cidr }}"
+    project: "{{ cornerstone_gcp_project }}"
+    auth_kind: "{{ cornerstone_gcp_auth_kind }}"
+    service_account_file: "{{ cornerstone_service_account_file }}"
+    state: present
+  register: subnet
+
+- set_fact:
+    from_template: "{{ lookup('template', '../templates/gcp_sg_rules_template.j2') }}"
+  vars:
+    to_cornerstone_template_gcp_sg: "{{ cornerstone_sg }}"
+
+- name: "Create firewall rules based on cornerstone_sg dict variable."
+  gcp_compute_firewall:
+    name: "{{ cornerstone_prefix }}-firewall"
+    network: "{{ vpc }}"
+    allowed: "{{ item.rules }}"
+    target_tags:
+      - "{{ cornerstone_prefix }}-firewall"
+    source_ranges: ['0.0.0.0/0']
+    project: "{{ cornerstone_gcp_project }}"
+    auth_kind: "{{ cornerstone_gcp_auth_kind }}"
+    state: present
+  with_items: "{{ from_template.cornerstone_sg }}"
+  register: firewall
+  when: not cornerstone_gcp_use_serviceaccount
+
+- name: "Create firewall rules based on cornerstone_sg dict variable."
+  gcp_compute_firewall:
+    name: "{{ cornerstone_prefix }}-firewall"
+    network: "{{ vpc }}"
+    allowed: "{{ item.rules }}"
+    target_tags:
+      - "{{ cornerstone_prefix }}-firewall"
+    source_ranges: ['0.0.0.0/0']
+    project: "{{ cornerstone_gcp_project }}"
+    auth_kind: "{{ cornerstone_gcp_auth_kind }}"
+    service_account_file: "{{ cornerstone_service_account_file}}"
+    state: present
+  with_items: "{{ from_template.cornerstone_sg }}"
+  register: firewall
+  when: cornerstone_gcp_use_serviceaccount

@@ -6,7 +6,7 @@
 # Common Tasks
 # =============================================================================
 #
-- include: common-{{ cornerstone_platform }}.yml
+- include_tasks: common-{{ cornerstone_platform }}.yml
   tags: [common, "{{ cornerstone_platform }}"]
   when:
     - cornerstone_platform != 'libvirt'
@@ -16,7 +16,7 @@
 # Network Tasks
 # =============================================================================
 #
-- include: network-{{ cornerstone_platform }}.yml
+- include_tasks: network-{{ cornerstone_platform }}.yml
   tags: [network, "{{ cornerstone_platform }}"]
   when:
     - cornerstone_platform != 'libvirt'
@@ -27,7 +27,7 @@
 # feature/adding_vmware_capabilities
 # =============================================================================
 
-#  include: "vm-{{ item.value.cornerstone_platform }}.yml"
+#  include_tasks: "vm-{{ item.value.cornerstone_platform }}.yml"
 
   # ============================== #
   #   CURRENT SUPPORT PLATFORMS:   #
@@ -35,9 +35,9 @@
   # ============================== #
 
 - name: Build vms based on dict
+  #include_tasks: "vm-{{ item.value.cornerstone_platform }}.yml"
   include_tasks: "vm-{{ item.value.cornerstone_platform }}.yml"
   vars:
-    cornerstone_platform: "{{ item.value.cornerstone_platform }}"
     cornerstone_tag_purpose: "{{ item.value.cornerstone_tag_purpose }}"
     cornerstone_tag_role: "{{ item.value.cornerstone_tag_role }}"
     cornerstone_vm_name: "{{ item.value.cornerstone_vm_name }}"
@@ -61,6 +61,7 @@
     cornerstone_vm_data_disk: "{{ item.value.cornerstone_vm_data_disk }}"
     cornerstone_vm_data_disk_device_name: "{{ item.value.cornerstone_vm_data_disk_device_name }}"
     cornerstone_aws_vm_data_disk_managed: "{{ item.value.cornerstone_aws_vm_data_disk_managed }}"
+    cornerstone_azure_vm_disk_managed: "{{ item.value.cornerstone_azure_vm_disk_managed }}"
     cornerstone_vm_data_disk_size: "{{ item.value.cornerstone_vm_data_disk_size }}"
     cornerstone_vm_location: "{{ item.value.cornerstone_vm_location }}"
     cornerstone_working_dir: "{{ item.value.cornerstone_working_dir }}"
@@ -70,6 +71,7 @@
     cornerstone_vm_libvirt_vmos: "{{ item.value.cornerstone_vm_libvirt_vmos }}"
     cornerstone_vm_libvirt_vmmem: "{{ item.value.cornerstone_vm_libvirt_vmmem }}"
     cornerstone_vm_libvirt_vmcores: "{{ item.value.cornerstone_vm_libvirt_vmcores }}"
+    cornerstone_vm_network_device: "{{ item.value.cornerstone_vm_network_device }}"
     cornerstone_vm_subnet: "{{ item.value.cornerstone_vm_subnet }}" 
     cornerstone_vm_gateway: "{{ item.value.cornerstone_vm_gateway }}"
     cornerstone_vm_dns1: "{{ item.value.cornerstone_vm_dns1 }}"
@@ -77,6 +79,15 @@
     cornerstone_vm_ip: "{{ item.value.cornerstone_vm_ip }}"
     cornerstone_vm_extra_nics: "{{item.value.cornerstone_vm_extra_nics}}"
     cornerstone_vm_netname: "{{item.value.cornerstone_vm_netname}}"
+    cornerstone_storage_type: "{{item.value.cornerstone_storage_type}}"
+  # ========================================================================== #
+  # BELOW ARE THE AZURE RELATED ITEMS
+  # ========================================================================== #
+    cornerstone_vm_image_offer: "{{item.value.cornerstone_vm_image_offer}}"
+    cornerstone_vm_image_publisher: "{{item.value.cornerstone_vm_image_publisher}}"
+    cornerstone_vm_image_sku: "{{item.value.cornerstone_vm_image_sku}}"
+    cornerstone_vm_image_version: "{{item.value.cornerstone_vm_image_version}}"
+    cornerstone_vm_azure_image: "{{item.value.cornerstone_vm_azure_image}}"
   # ========================================================================== #
   #  BELOW IS THE VMWARE HOST DEFINITION ITEMS USED FOR MAKING A VMWARE GUEST  #
   #    SOME DEFINITIONS FROM ABOVE ARE ALSO USED LIKE PLATFORM, STATE, ETC
@@ -107,6 +118,14 @@
     cornerstone_vmware_iso_name: "{{ item.value.cornerstone_vmware_iso_name }}"
     cornerstone_vmware_network_name: "{{ item.value.cornerstone_vmware_network_name }}"
     cornerstone_vmware_nic_mac: "{{ item.value.cornerstone_vmware_nic_mac }}"
+# ========================================================================== #
+# BELOW ARE THE GCP RELATED ITEMS
+# ========================================================================== #
+    cornerstone_gcp_project: "{{ item.value.cornerstone_gcp_project }}"
+    cornerstone_gcp_auth_kind: "{{ item.value.cornerstone_gcp_auth_kind }}"
+    cornerstone_service_account_file: "{{ item.value.cornerstone_service_account_file }}"
+    cornerstone_gcp_zone: "{{ item.value.cornerstone_gcp_zone }}"
+    cornerstone_vm_gcp_source_image: "{{ item.value.cornerstone_vm_gcp_source_image }}"
   loop: "{{ guests|dict2items }}"  
   tags: [vm, "{{ cornerstone_platform }}"]
 
@@ -115,7 +134,7 @@
 # =============================================================================
 
 - name: Discover IP address tasks
-  include: discover-ip-{{ cornerstone_platform }}.yml
+  include_tasks: discover-ip-{{ cornerstone_platform }}.yml
   vars:
     cornerstone_platform: "{{ item.value.cornerstone_platform }}"
     cornerstone_tag_purpose: "{{ item.value.cornerstone_tag_purpose }}"
@@ -152,6 +171,8 @@
     cornerstone_vm_dns1: "{{ item.value.cornerstone_vm_dns1 }}"
     cornerstone_vm_dns2: "{{ item.value.cornerstone_vm_dns2 }}"
     cornerstone_vm_ip: "{{ item.value.cornerstone_vm_ip }}"
+    #    cornerstone_ssh_extra_args: "{{item.value.cornerstone_ssh_extra_args}}"
+    cornerstone_python_interpreter: "{{item.value.cornerstone_python_interpreter}}"
     #    cornerstone_ssh_vars: "{{ item.value.cornerstone_ssh_vars }}"
   loop: "{{ guests|dict2items }}"
   tags: ["{{ cornerstone_platform }}"]

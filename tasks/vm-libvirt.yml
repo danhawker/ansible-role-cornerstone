@@ -59,7 +59,11 @@
       file: path={{ cornerstone_working_dir }}{{ cornerstone_vm_name }} state=directory
       when: 
         - cornerstone_vm_name not in disks.stdout
-     
+
+# Need to add a section were we squirt in root passwords.
+# virt-customize --root-password password:password123 -a rhel-8.2-x86_64-kvm.qcow2
+#
+
     - name: "Clone Image"
       command: >
                virt-clone --connect qemu:///system --original {{ cornerstone_vm_libvirt_template }} 
@@ -107,7 +111,15 @@
         - cornerstone_vm_name not in disks.stdout 
         - cornerstone_vm_libvirt_vmtype != "emptyvm"
         - cornerstone_vm_state == 'present'
-    
+   
+    - name: "Set Network For VMs"
+      shell: "virt-xml --network network={{cornerstone_virtual_network_name}},model=virtio {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --edit"
+      when:
+        - cornerstone_vm_name not in disks.stdout
+        - cornerstone_vm_libvirt_vmtype != "emptyvm"
+        - cornerstone_vm_state == 'present'
+
+ 
     - name: "Increase disk sizes"
       shell: "qemu-img resize {{ cornerstone_vm_location }}{{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}.{{ cornerstone_vm_libvirt_file_type }} +{{ cornerstone_vm_os_disk_size }}G"
       when: 
@@ -126,7 +138,7 @@
 
     - name: "Create network configuration for each VM"
       shell: echo -e "BOOTPROTO=static
-             \nDEVICE=eth0
+             \nDEVICE={{ cornerstone_vm_network_device }}
              \nONBOOT=yes
              \nTYPE=Ethernet
              \nIPADDR={{ cornerstone_vm_ip }}
@@ -134,7 +146,7 @@
              \nGATEWAY={{ cornerstone_vm_gateway }}
              \nDNS1={{ cornerstone_vm_dns1 }}
              \nDNS2={{ cornerstone_vm_dns2 }}
-             \nDOMAIN={{ cornerstone_public_private_domain_name }}" >>{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/ifcfg-eth0
+             \nDOMAIN={{ cornerstone_public_private_domain_name }}" >>{{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/ifcfg-{{ cornerstone_vm_network_device }}
       when: 
         - cornerstone_vm_name not in disks.stdout 
         - cornerstone_vm_libvirt_vmtype != "emptyvm"
@@ -151,7 +163,7 @@
         - cornerstone_vm_state == 'present'
     
     - name: "Set Hostname and Copy in network configuration"
-      shell: "virt-customize --hostname {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/ifcfg-eth0:/etc/sysconfig/network-scripts/ --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/hosts:/etc/ --edit /etc/ssh/sshd_config:'s/^#UseDNS yes/UseDNS no/' -d {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
+      shell: "virt-customize --hostname {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/ifcfg-{{ cornerstone_vm_network_device }}:/etc/sysconfig/network-scripts/ --copy-in {{ cornerstone_working_dir }}{{ cornerstone_vm_name }}/hosts:/etc/ --edit /etc/ssh/sshd_config:'s/^#UseDNS yes/UseDNS no/' -d {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
       when: 
         - cornerstone_vm_name not in disks.stdout 
         - cornerstone_vm_libvirt_vmtype != "emptyvm"
@@ -169,7 +181,15 @@
         - cornerstone_vm_name not in disks.stdout 
         - cornerstone_vm_libvirt_vmtype != "emptyvm"
         - cornerstone_vm_state == 'present'
-    
+
+    - name: "Set root password on VM if requested"
+      shell: "virt-customize --root-password password:{{cornerstone_root_password}} -d {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }}"
+      when:
+        - cornerstone_vm_name not in disks.stdout
+        - cornerstone_vm_libvirt_vmtype != "emptyvm"
+        - cornerstone_vm_state == 'present'
+        - cornerstone_vm_set_root_password == "yes"
+
           #    - cornerstone_vm_libvirt_template == 'rhel7-image'
     
     # If a new image is created you will need to run the following command on the image else you wont be able to ssh to the cloned systems.
@@ -224,7 +244,7 @@
   block:
     - name: "Check if the correct number of nics have already been added."
       shell:
-        cmd: "virsh dumpxml {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} | grep '<mac' | wc -l"
+        cmd: "virsh dumpxml {{ cornerstone_vm_name }}.{{ cornerstone_public_private_domain_name }} | grep 'mac address' | wc -l"
       ignore_errors: yes
       register: vm_nic_num
     
